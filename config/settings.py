@@ -27,7 +27,31 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-nu@_9owvjln79-^ye_odz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+# Host Configuration
+ALLOWED_HOSTS = ['dgclub.shop', 'www.dgclub.shop', 'localhost', '127.0.0.1']
+
+# Add dashboard-defined hosts
+env_hosts = os.environ.get("ALLOWED_HOSTS")
+if env_hosts:
+    ALLOWED_HOSTS.extend([h.strip() for h in env_hosts.split(",") if h.strip()])
+
+# Add Render's automatic hostname
+render_external_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if render_external_host:
+    ALLOWED_HOSTS.append(render_external_host)
+
+# Fallback to allow everything if Debug is True and list is somehow empty
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*']
+
+# Security Origins for Custom Domain
+CSRF_TRUSTED_ORIGINS = [
+    "https://dgclub.shop",
+    "https://www.dgclub.shop",
+]
+
+if render_external_host:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{render_external_host}")
 
 
 # Application definition
