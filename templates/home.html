@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .home-header {
+        background: var(--primary-gradient);
+        padding: 20px 20px 40px 20px;
+        color: white;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .timer-card {
+        background: white;
+        margin: -30px 15px 15px 15px;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        text-align: center;
+        position: relative;
+    }
+
+    .bet-btn {
+        flex: 1;
+        padding: 15px 5px;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .bet-red { background: var(--primary-red); }
+    .bet-green { background: var(--accent-green); }
+    .bet-violet { background: var(--accent-violet); }
+    
+    .bet-form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    }
+    
+    .color-display-btn {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        background: #ccc;
+    }
+</style>
+
+<div class="home-header">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <i class="fas fa-headset" style="font-size: 1.2rem;"></i>
+        <div style="font-weight:bold; font-size:1.1rem;">DG Club Simulator</div>
+        <a href="{% url 'account' %}" style="color:white;"><i class="fas fa-wallet" style="font-size: 1.2rem;"></i></a>
+    </div>
+</div>
+
+<div class="timer-card">
+    <div style="color:var(--text-muted); font-size:0.9rem; margin-bottom:5px;">Round: {{ round.round_id }}</div>
+    <div style="font-size: 3rem; font-weight: bold; color:var(--text-dark);" id="timer">--</div>
+    <div style="font-size: 0.8rem; color:var(--text-muted); margin-top:5px;">
+        <i class="fas fa-circle-notch fa-spin"></i> Status: {{ round.status }}
+    </div>
+</div>
+
+<div style="display: flex; gap: 10px; margin: 15px;">
+    <button class="bet-btn bet-green" onclick="selectColor('GREEN', '#34d399')">GREEN (2x)</button>
+    <button class="bet-btn bet-violet" onclick="selectColor('VIOLET', '#8b5cf6')">VIOLET (4.5x)</button>
+    <button class="bet-btn bet-red" onclick="selectColor('RED', '#ff5e62')">RED (2x)</button>
+</div>
+
+<div class="bet-form-card">
+    <h3 style="margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Place Bet</h3>
+    <form method="post" action="{% url 'place_trade' %}" id="betForm">
+        {% csrf_token %}
+        <input type="hidden" name="round_id" value="{{ round.id }}">
+        <input type="hidden" name="color" id="selectedColor" value="">
+        
+        <div style="margin: 15px 0;">
+            <span style="font-size: 0.9rem; color: var(--text-muted);">Selection: </span>
+            <span class="color-display-btn" id="colorDisplay">None</span>
+        </div>
+        
+        <input type="number" name="amount" id="amount" placeholder="Enter bet amount (₹)" min="1" step="1" required style="font-size: 1.1rem; text-align: center;">
+        
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 15px; margin-top: 15px; font-size: 1.1rem;" id="submitBtn">Confirm Bet</button>
+    </form>
+</div>
+
+<script>
+    let timeRemaining = parseInt("{{ time_remaining }}");
+    const timerEl = document.getElementById('timer');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    function selectColor(color, hex) {
+        document.getElementById('selectedColor').value = color;
+        const display = document.getElementById('colorDisplay');
+        display.innerText = color;
+        display.style.background = hex;
+    }
+
+    function updateTimer() {
+        if (timeRemaining > 0) {
+            let seconds = timeRemaining % 60;
+            timerEl.innerText = `${seconds < 10 ? '0' : ''}${seconds}s`;
+            timeRemaining--;
+        } else {
+            timerEl.innerText = "00s";
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Round Closed - Waiting for Result";
+            submitBtn.style.background = "#ccc";
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+</script>
+{% endblock %}

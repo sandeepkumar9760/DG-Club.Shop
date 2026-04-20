@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        overflow-x: auto;
+        background: var(--bg-color);
+    }
+    
+    .tab {
+        padding: 10px 20px;
+        background: white;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+    
+    .tab.active {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+    }
+
+    .dropdown-filters {
+        display: flex;
+        gap: 10px;
+        padding: 0 15px 15px 15px;
+    }
+    
+    .filter-select {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: white;
+        color: var(--text-dark);
+        outline: none;
+        font-size: 0.9rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 15px;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: #c0c4cc;
+    }
+
+    .empty-state i {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .tx-item {
+        background: white;
+        padding: 15px;
+        margin: 0 15px 10px 15px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .tx-amount { font-weight: bold; font-size: 1.1rem; }
+    .tx-green { color: var(--accent-green); }
+    .tx-red { color: var(--primary-red); }
+
+    .custom-date-box {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: white;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    /* Bottom Sheet Picker */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 2000;
+        display: none; opacity: 0; transition: opacity 0.3s;
+    }
+    .bottom-sheet {
+        position: fixed; bottom: -100%; left: 0; right: 0;
+        background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
+    }
+    .sheet-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1rem;
+    }
+    .sheet-header .cancel { color: var(--text-muted); cursor: pointer; }
+    .sheet-header .title { font-weight: bold; }
+    .sheet-header .confirm { color: var(--primary-red); cursor: pointer; }
+    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
+    .picker-column {
+        flex: 1; height: 100%; overflow-y: auto;
+        scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0;
+    }
+    .picker-column::-webkit-scrollbar { display: none; }
+    .picker-item {
+        height: 40px; display: flex; justify-content: center; align-items: center;
+        scroll-snap-align: center; font-size: 1.1rem; color: var(--text-muted); transition: color 0.2s;
+    }
+    .picker-highlight {
+        position: absolute; top: 80px; left: 0; right: 0; height: 40px;
+        border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+        pointer-events: none;
+    }
+    .tx-card {
+        background: white;
+        margin: 0 15px 12px 15px;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .badge-bonus {
+        display: inline-block;
+        background: linear-gradient(90deg, #a78bfa, #60a5fa);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+    .card-row .label { color: var(--text-muted); }
+    .card-row .value { font-weight: 500; color: var(--text-dark); }
+    .card-row .amount-green { font-weight: bold; color: var(--accent-green); }
+    .card-note {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed var(--border-color);
+    }
+</style>
+
+<div class="header-basic">
+    <a href="{% url 'account' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+    Transaction History
+</div>
+
+<div class="filter-tabs">
+    <div class="tab active"><i class="fas fa-th-large"></i> All</div>
+    <div class="tab"><i class="fas fa-gift" style="color: #a78bfa;"></i> Bonus</div>
+    <div class="tab"><i class="fas fa-caret-up" style="color: #f59e0b;"></i> Deposit</div>
+    <div class="tab"><i class="fas fa-credit-card" style="color: #10b981;"></i> Withdraw</div>
+</div>
+
+<div class="dropdown-filters">
+    <select class="filter-select">
+        <option>Bonus</option>
+        <option>All</option>
+        <option>Deposit</option>
+        <option>Withdraw</option>
+    </select>
+    <div class="custom-date-box" onclick="openPicker()">
+        <span id="currentDate">Choose a date</span>
+        <i class="fas fa-chevron-down" style="color: var(--text-muted);"></i>
+    </div>
+</div>
+
+<!-- Date Picker Modal -->
+<div class="modal-overlay" id="overlay" onclick="closePicker()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-header">
+        <div class="cancel" onclick="closePicker()">Cancel</div>
+        <div class="title">Choose a date</div>
+        <div class="confirm" onclick="confirmDate()">Confirm</div>
+    </div>
+    <div class="picker-container">
+        <div class="picker-highlight"></div>
+        <div class="picker-column" id="colYear" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colMonth" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colDay" onscroll="handleScroll(this)"></div>
+    </div>
+</div>
+
+<!-- Static Bonus Transactions from screenshot -->
+<div class="tx-card">
+    <div class="badge-bonus">Bonus</div>
+    <div class="card-row">
+        <span class="label">Detail</span>
+        <span class="value">Bonus</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-09 12:13:18</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount-green">₹23,422.00</span>
+    </div>
+    <div class="card-note">ads fee</div>
+</div>
+
+<div class="tx-card">
+    <div class="badge-bonus">Bonus</div>
+    <div class="card-row">
+        <span class="label">Detail</span>
+        <span class="value">Bonus</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-09 11:13:53</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount-green">₹13,000.00</span>
+    </div>
+    <div class="card-note">agent salary</div>
+</div>
+
+<div class="tx-card">
+    <div class="badge-bonus">Bonus</div>
+    <div class="card-row">
+        <span class="label">Detail</span>
+        <span class="value">Bonus</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-08 09:45:22</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount-green">₹8,500.00</span>
+    </div>
+    <div class="card-note">referral bonus</div>
+</div>
+
+<!-- Dynamic DB transactions -->
+{% if transactions %}
+    {% for tx in transactions %}
+    <div class="tx-item">
+        <div>
+            <div style="font-weight: 500; font-size: 0.95rem;">{{ tx.transaction_type }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">{{ tx.timestamp|date:"Y-m-d H:i:s" }}</div>
+        </div>
+        <div class="tx-amount {% if tx.transaction_type in 'WIN,DEPOSIT' %}tx-green{% else %}tx-red{% endif %}">
+            {% if tx.transaction_type in 'WIN,DEPOSIT' %}+{% else %}-{% endif %}₹{{ tx.amount }}
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<script>
+    const overlay = document.getElementById('overlay');
+    const sheet = document.getElementById('bottomSheet');
+    const display = document.getElementById('currentDate');
+    
+    const colYear = document.getElementById('colYear');
+    const colMonth = document.getElementById('colMonth');
+    const colDay = document.getElementById('colDay');
+    
+    function populateColumn(el, start, end, pad=false) {
+        let html = '';
+        for(let i=start; i<=end; i++) {
+            let val = pad && i < 10 ? '0'+i : i;
+            html += `<div class="picker-item" data-val="${val}">${val}</div>`;
+        }
+        el.innerHTML = html;
+        updateHighlight(el);
+    }
+
+    const today = new Date();
+    const curYear = today.getFullYear();
+    const curMonth = today.getMonth() + 1;
+    const curDay = today.getDate();
+
+    if(!display.innerText.includes('-') || display.innerText === '2026-04-18') {
+        display.innerText = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
+    }
+
+    populateColumn(colYear, 2020, curYear + 5);
+    populateColumn(colMonth, 1, 12, true);
+
+    function updateDays() {
+        let y = parseInt(getSelected(colYear) || curYear);
+        let m = parseInt(getSelected(colMonth) || curMonth);
+        let daysInMonth = new Date(y, m, 0).getDate();
+        let prevDay = getSelected(colDay);
+        
+        populateColumn(colDay, 1, daysInMonth, true);
+        
+        if(prevDay) {
+            let d = Math.min(parseInt(prevDay), daysInMonth);
+            scrollToVal(colDay, String(d).padStart(2, '0'));
+        }
+    }
+
+    updateDays();
+
+    function openPicker() {
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            sheet.style.bottom = '0';
+        }, 10);
+        
+        let parts = display.innerText !== 'Choose a date' && display.innerText.includes('-') ? 
+                    display.innerText.split('-') : 
+                    [String(curYear), String(curMonth).padStart(2,'0'), String(curDay).padStart(2,'0')];
+                    
+        scrollToVal(colYear, parts[0]);
+        scrollToVal(colMonth, parts[1]);
+        updateDays();
+        scrollToVal(colDay, parts[2]);
+    }
+
+    function closePicker() {
+        sheet.style.bottom = '-100%';
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+    
+    function scrollToVal(column, val) {
+        let items = column.querySelectorAll('.picker-item');
+        for(let i=0; i<items.length; i++) {
+            if(items[i].dataset.val == val) {
+                column.scrollTop = i * 40;
+                break;
+            }
+        }
+        updateHighlight(column);
+    }
+
+    function updateHighlight(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        
+        items.forEach((item, idx) => {
+            item.style.color = (idx === centerIndex) ? 'var(--text-dark)' : 'var(--text-muted)';
+            item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
+        });
+    }
+
+    function handleScroll(column) {
+        updateHighlight(column);
+        if(column.id === 'colYear' || column.id === 'colMonth') {
+            updateDays();
+        }
+    }
+
+    function getSelected(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        if(items[centerIndex]) return items[centerIndex].dataset.val;
+        return "";
+    }
+
+    function confirmDate() {
+        let y = getSelected(colYear);
+        let m = getSelected(colMonth);
+        let d = getSelected(colDay);
+        if(y && m && d) {
+            display.innerText = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        }
+        closePicker();
+    }
+</script>
+
+{% endblock %}

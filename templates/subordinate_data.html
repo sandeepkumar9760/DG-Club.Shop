@@ -1,0 +1,600 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .search-bar {
+        display: flex;
+        padding: 15px;
+        gap: 10px;
+    }
+    .search-input {
+        flex: 1;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+    .search-btn {
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0 20px;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+
+    .filters {
+        display: flex;
+        padding: 0 15px 15px 15px;
+        gap: 10px;
+    }
+    .filter-select {
+        flex: 1;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        outline: none;
+        font-size: 0.9rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 15px;
+    }
+
+    .custom-date-box {
+        flex: 1;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        color: var(--text-dark);
+    }
+
+    .red-card {
+        background: #ba2d31; /* Darkish red from the image */
+        margin: 0 15px 15px 15px;
+        border-radius: 12px;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        text-align: center;
+        color: white;
+    }
+
+    .red-card .val {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .red-card .lbl {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        color: #c0c4cc;
+    }
+
+    /* Bottom Sheet Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 2000;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    
+    .bottom-sheet {
+        position: fixed;
+        bottom: -100%;
+        left: 0; right: 0;
+        background: white;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        z-index: 2001;
+        transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-bottom: 20px;
+    }
+    
+    .sheet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1rem;
+    }
+    
+    .sheet-header .cancel { color: var(--text-muted); cursor: pointer; }
+    .sheet-header .title { font-weight: bold; }
+    .sheet-header .confirm { color: var(--primary-red); cursor: pointer; }
+
+    /* Picker Rollers */
+    .picker-container {
+        display: flex;
+        height: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .picker-column {
+        flex: 1;
+        height: 100%;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        scrollbar-width: none; 
+        -ms-overflow-style: none;
+        padding: 80px 0;
+    }
+    .picker-column::-webkit-scrollbar { display: none; }
+    
+    .picker-item {
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        scroll-snap-align: center;
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        transition: color 0.2s, font-size 0.2s;
+    }
+    
+    /* Selection highlight overlay */
+    .picker-highlight {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        pointer-events: none;
+    }
+    
+    /* User Cards */
+    .user-card {
+        background: #ba2d31;
+        margin: 0 15px;
+        border-radius: 12px;
+        padding: 20px;
+        color: white;
+        font-size: 0.9rem;
+        box-shadow: none;
+    }
+    
+    .user-card .card-header {
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        color: white;
+        font-size: 1.05rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-card .card-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .user-card .card-row span:first-child {
+        opacity: 0.8;
+    }
+    
+    .user-card .card-row .val {
+        color: white;
+    }
+    
+    .user-card .card-row .val.orange {
+        color: #eab308; /* vibrant orange/yellow for amounts matching screenshot */
+    }
+    
+    .user-card .card-row .val.text-muted {
+        color: rgba(255,255,255,0.6);
+    }
+</style>
+
+<div class="header-basic">
+    <a href="{% url 'agency' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+    Subordinate data
+</div>
+
+<div class="search-bar">
+    <input type="text" class="search-input" placeholder="Search subordinate UID">
+    <button class="search-btn"><i class="fas fa-search"></i></button>
+</div>
+
+<div class="filters">
+    <select class="filter-select">
+        <option>All</option>
+    </select>
+    <div class="custom-date-box" onclick="openPicker()">
+        <span id="currentDate">2026-04-18</span>
+        <i class="fas fa-chevron-down" style="color: var(--text-muted);"></i>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="overlay" onclick="closePicker()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-header">
+        <div class="cancel" onclick="closePicker()">Cancel</div>
+        <div class="title">Choose a date</div>
+        <div class="confirm" onclick="confirmDate()">Confirm</div>
+    </div>
+    <div class="picker-container">
+        <div class="picker-highlight"></div>
+        <div class="picker-column" id="colYear" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colMonth" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colDay" onscroll="handleScroll(this)"></div>
+    </div>
+</div>
+
+
+<div class="red-card">
+    <div><div class="val" id="val_dep_num">0</div><div class="lbl">Deposit number</div></div>
+    <div><div class="val" id="val_dep_amt">0</div><div class="lbl">Deposit amount</div></div>
+    <div><div class="val" id="val_bet_num">0</div><div class="lbl">Number of bettors</div></div>
+    <div><div class="val" id="val_bet_amt">0</div><div class="lbl">Total bet</div></div>
+    <div><div class="val" id="val_first_dep_num">0</div><div class="lbl">Number of people making first deposit</div></div>
+    <div><div class="val" id="val_first_dep_amt">0</div><div class="lbl">First deposit amount</div></div>
+</div>
+
+<div id="subordinate-list">
+    <!-- Populated by JS -->
+</div>
+
+<script>
+    const overlay = document.getElementById('overlay');
+    const sheet = document.getElementById('bottomSheet');
+    const display = document.getElementById('currentDate');
+    
+    const colYear = document.getElementById('colYear');
+    const colMonth = document.getElementById('colMonth');
+    const colDay = document.getElementById('colDay');
+    
+    function populateColumn(el, start, end, pad=false) {
+        let html = '';
+        for(let i=start; i<=end; i++) {
+            let val = pad && i < 10 ? '0'+i : i;
+            html += `<div class="picker-item" data-val="${val}">${val}</div>`;
+        }
+        el.innerHTML = html;
+        updateHighlight(el);
+    }
+
+    const today = new Date();
+    const curYear = today.getFullYear();
+    const curMonth = today.getMonth() + 1;
+    const curDay = today.getDate();
+
+    if(!display.innerText.includes('-') || display.innerText === '2026-04-18') {
+        display.innerText = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
+    }
+
+    populateColumn(colYear, 2020, curYear + 5);
+    populateColumn(colMonth, 1, 12, true);
+
+    function updateDays() {
+        let y = parseInt(getSelected(colYear) || curYear);
+        let m = parseInt(getSelected(colMonth) || curMonth);
+        let daysInMonth = new Date(y, m, 0).getDate();
+        let prevDay = getSelected(colDay);
+        
+        populateColumn(colDay, 1, daysInMonth, true);
+        
+        if(prevDay) {
+            let d = Math.min(parseInt(prevDay), daysInMonth);
+            scrollToVal(colDay, String(d).padStart(2, '0'));
+        }
+    }
+
+    updateDays();
+
+    function openPicker() {
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            sheet.style.bottom = '0';
+        }, 10);
+        
+        let parts = display.innerText !== 'Choose a date' && display.innerText.includes('-') ? 
+                    display.innerText.split('-') : 
+                    [String(curYear), String(curMonth).padStart(2,'0'), String(curDay).padStart(2,'0')];
+                    
+        scrollToVal(colYear, parts[0]);
+        scrollToVal(colMonth, parts[1]);
+        updateDays();
+        scrollToVal(colDay, parts[2]);
+    }
+
+    function closePicker() {
+        sheet.style.bottom = '-100%';
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+    
+    function scrollToVal(column, val) {
+        let items = column.querySelectorAll('.picker-item');
+        for(let i=0; i<items.length; i++) {
+            if(items[i].dataset.val == val) {
+                column.scrollTop = i * 40;
+                break;
+            }
+        }
+        updateHighlight(column);
+    }
+
+    function updateHighlight(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        
+        items.forEach((item, idx) => {
+            item.style.color = (idx === centerIndex) ? 'var(--text-dark)' : 'var(--text-muted)';
+            item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
+        });
+    }
+
+    function handleScroll(column) {
+        updateHighlight(column);
+        if(column.id === 'colYear' || column.id === 'colMonth') {
+            updateDays();
+        }
+    }
+
+    function getSelected(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        if(items[centerIndex]) return items[centerIndex].dataset.val;
+        return "";
+    }
+
+    // Mock Data Store for specific dates
+    const specificData = {
+        "2026-04-19": {
+            dep_num: 12,
+            dep_amt: 14500,
+            bet_num: 220,
+            bet_amt: 384500,
+            first_dep_num: 12,
+            first_dep_amt: 800
+        },
+        "2026-04-18": {
+            dep_num: 157,
+            dep_amt: 71489,
+            bet_num: 15,
+            bet_amt: 6000,
+            first_dep_num: 102,
+            first_dep_amt: 200
+        },
+        "2026-04-17": {
+            dep_num: 355,
+            dep_amt: 86261.99,
+            bet_num: 268,
+            bet_amt: 107320,
+            first_dep_num: 154,
+            first_dep_amt: 12500
+        },
+        "2026-04-16": {
+            dep_num: 483,
+            dep_amt: 387039.97,
+            bet_num: 320,
+            bet_amt: 407320,
+            first_dep_num: 254,
+            first_dep_amt: 2500
+        },
+        "2026-04-15": {
+            dep_num: 412,
+            dep_amt: 345000.50,
+            bet_num: 298,
+            bet_amt: 367800,
+            first_dep_num: 215,
+            first_dep_amt: 2200
+        },
+        "2026-04-14": {
+            dep_num: 389,
+            dep_amt: 298000.75,
+            bet_num: 245,
+            bet_amt: 295000,
+            first_dep_num: 180,
+            first_dep_amt: 1950
+        },
+        "2026-04-13": {
+            dep_num: 512,
+            dep_amt: 410200.20,
+            bet_num: 350,
+            bet_amt: 450600,
+            first_dep_num: 240,
+            first_dep_amt: 2800
+        },
+        "2026-04-12": {
+            dep_num: 467,
+            dep_amt: 389100.00,
+            bet_num: 310,
+            bet_amt: 395000,
+            first_dep_num: 225,
+            first_dep_amt: 2400
+        },
+        "2026-04-11": {
+            dep_num: 290,
+            dep_amt: 156000.80,
+            bet_num: 198,
+            bet_amt: 210000,
+            first_dep_num: 150,
+            first_dep_amt: 1600
+        },
+        "2026-04-10": {
+            dep_num: 315,
+            dep_amt: 184500.50,
+            bet_num: 215,
+            bet_amt: 235600,
+            first_dep_num: 165,
+            first_dep_amt: 1750
+        },
+        "2026-04-09": {
+            dep_num: 425,
+            dep_amt: 356000.25,
+            bet_num: 305,
+            bet_amt: 380400,
+            first_dep_num: 210,
+            first_dep_amt: 2150
+        },
+        "2026-04-08": {
+            dep_num: 378,
+            dep_amt: 289500.00,
+            bet_num: 260,
+            bet_amt: 320000,
+            first_dep_num: 185,
+            first_dep_amt: 1850
+        },
+        "2026-04-07": {
+            dep_num: 450,
+            dep_amt: 375200.40,
+            bet_num: 315,
+            bet_amt: 385000,
+            first_dep_num: 230,
+            first_dep_amt: 2350
+        },
+        "2026-04-06": {
+            dep_num: 395,
+            dep_amt: 310500.60,
+            bet_num: 275,
+            bet_amt: 340500,
+            first_dep_num: 195,
+            first_dep_amt: 2050
+        }
+        // ADD MORE DATES HERE AS NEEDED
+    };
+
+    function distributeAmount(total, pieces) {
+        if (pieces <= 0) return [];
+        if (pieces === 1) return [total];
+        let distribution = new Array(pieces).fill(0);
+        let remaining = total;
+        for(let i = 0; i < pieces - 1; i++) {
+            let amount = Math.random() * (remaining / (pieces - i)) * 2;
+            amount = Math.round(amount * 100) / 100;
+            distribution[i] = amount;
+            remaining -= amount;
+        }
+        distribution[pieces - 1] = Math.round(remaining * 100) / 100;
+        return distribution;
+    }
+
+    function updateStatsForDate(dateStr) {
+        let d = specificData[dateStr] || { dep_num: 0, dep_amt: 0, bet_num: 0, bet_amt: 0, first_dep_num: 0, first_dep_amt: 0 };
+        document.getElementById('val_dep_num').innerText = d.dep_num;
+        document.getElementById('val_dep_amt').innerText = d.dep_amt;
+        document.getElementById('val_bet_num').innerText = d.bet_num;
+        document.getElementById('val_bet_amt').innerText = d.bet_amt;
+        document.getElementById('val_first_dep_num').innerText = d.first_dep_num;
+        document.getElementById('val_first_dep_amt').innerText = d.first_dep_amt;
+        
+        let listContainer = document.getElementById('subordinate-list');
+        
+        if (d.bet_num === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e5e7eb; margin-bottom: 15px;"></i>
+                    <p>No data</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        let uids = [];
+        for(let i=0; i<d.bet_num; i++) {
+            uids.push(Math.floor(1000000 + Math.random() * 8999999));
+        }
+
+        // Limit dep_num so it doesn't exceed bet_num mathematically
+        let actualDepNum = Math.min(d.dep_num, d.bet_num);
+        let depDist = distributeAmount(d.dep_amt, actualDepNum);
+        let commDist = distributeAmount(d.bet_amt * 0.015, d.bet_num);
+
+        let userDeps = new Array(d.bet_num).fill(0);
+        let indices = Array.from({length: d.bet_num}, (_, i) => i);
+        // Shuffle
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        
+        for(let i=0; i<actualDepNum; i++) {
+            if(i < depDist.length) {
+                userDeps[indices[i]] = depDist[i];
+            }
+        }
+
+        for(let i=0; i<d.bet_num; i++) {
+            let deposit = userDeps[i] || 0;
+            let comm = commDist[i] || 0;
+            
+            let depositStr = deposit === 0 ? "0" : deposit.toFixed(2);
+            let commStr = comm === 0 ? "0" : comm.toFixed(2);
+            
+            html += `
+            <div class="user-card">
+                <div class="card-header">
+                    <span>UID:${uids[i]} <i class="far fa-copy" style="margin-left: 5px; cursor: pointer;"></i></span>
+                </div>
+                <div class="card-row">
+                    <span>Level</span>
+                    <span class="val">1</span>
+                </div>
+                <div class="card-row">
+                    <span>Deposit amount</span>
+                    <span class="val orange">${depositStr}</span>
+                </div>
+                <div class="card-row">
+                    <span>Commission</span>
+                    <span class="val orange">${commStr}</span>
+                </div>
+                <div class="card-row">
+                    <span>Time</span>
+                    <span class="val text-muted">${dateStr}</span>
+                </div>
+            </div>
+            `;
+        }
+        
+        listContainer.innerHTML = html;
+    }
+
+    // Initialize stats
+    updateStatsForDate(display.innerText);
+
+    function confirmDate() {
+        let y = getSelected(colYear);
+        let m = getSelected(colMonth);
+        let d = getSelected(colDay);
+        if(y && m && d) {
+            let dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            display.innerText = dateStr;
+            updateStatsForDate(dateStr);
+        }
+        closePicker();
+    }
+</script>
+{% endblock %}

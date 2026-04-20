@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .withdraw-card {
+        background: white;
+        margin: 0 15px 12px 15px;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .badge-withdraw {
+        background: var(--primary-red);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .status-completed {
+        color: var(--accent-green);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .card-row .label { color: var(--text-muted); }
+    .card-row .value { font-weight: 500; color: var(--text-dark); }
+    .card-row .amount { font-weight: bold; color: var(--text-dark); font-size: 0.95rem; }
+
+    .order-num {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        overflow-x: auto;
+        background: var(--bg-color);
+    }
+
+    .tab {
+        padding: 10px 20px;
+        background: white;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-dark);
+        border: 1px solid var(--border-color);
+    }
+
+    .tab.active { background: var(--primary-gradient); color: white; border: none; }
+
+    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; }
+    .filter-select {
+        flex: 1; padding: 12px; border-radius: 8px; border: none;
+        background: white; color: var(--text-dark); outline: none; font-size: 0.9rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat; background-position: right 10px center; background-size: 15px;
+    }
+    .custom-date-box {
+        flex: 1; padding: 12px; border-radius: 8px; border: none;
+        background: white; color: var(--text-dark); font-size: 0.9rem;
+        display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+
+    /* Picker styles */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
+    }
+    .bottom-sheet {
+        position: fixed; bottom: -100%; left: 0; right: 0;
+        background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
+    }
+    .sheet-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1rem;
+    }
+    .sheet-header .cancel { color: var(--text-muted); cursor: pointer; }
+    .sheet-header .title { font-weight: bold; }
+    .sheet-header .confirm { color: var(--primary-red); cursor: pointer; }
+    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
+    .picker-column {
+        flex: 1; height: 100%; overflow-y: auto;
+        scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0;
+    }
+    .picker-column::-webkit-scrollbar { display: none; }
+    .picker-item {
+        height: 40px; display: flex; justify-content: center; align-items: center;
+        scroll-snap-align: center; font-size: 1.1rem; color: var(--text-muted); transition: color 0.2s;
+    }
+    .picker-highlight {
+        position: absolute; top: 80px; left: 0; right: 0; height: 40px;
+        border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+        pointer-events: none;
+    }
+</style>
+
+<div class="header-basic">
+    <a href="{% url 'account' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+    Withdrawal History
+</div>
+
+<div class="filter-tabs">
+    <div class="tab active"><i class="fas fa-th-large"></i> All</div>
+    <div class="tab"><i class="fas fa-check-circle" style="color:#34d399;"></i> Completed</div>
+    <div class="tab"><i class="fas fa-clock" style="color:#f59e0b;"></i> Pending</div>
+</div>
+
+<div class="dropdown-filters">
+    <select class="filter-select">
+        <option>All</option>
+        <option>USDT</option>
+        <option>Bank</option>
+    </select>
+    <div class="custom-date-box" onclick="openPicker()">
+        <span id="currentDate">Choose a date</span>
+        <i class="fas fa-chevron-down" style="color: var(--text-muted);"></i>
+    </div>
+</div>
+
+<!-- Date Picker Modal -->
+<div class="modal-overlay" id="overlay" onclick="closePicker()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-header">
+        <div class="cancel" onclick="closePicker()">Cancel</div>
+        <div class="title">Choose a date</div>
+        <div class="confirm" onclick="confirmDate()">Confirm</div>
+    </div>
+    <div class="picker-container">
+        <div class="picker-highlight"></div>
+        <div class="picker-column" id="colYear" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colMonth" onscroll="handleScroll(this)"></div>
+        <div class="picker-column" id="colDay" onscroll="handleScroll(this)"></div>
+    </div>
+</div>
+
+<!-- Withdrawal Entry 1 -->
+<div class="withdraw-card">
+    <div class="card-top">
+        <span class="badge-withdraw">Withdraw</span>
+        <span class="status-completed"><i class="fas fa-check-circle"></i> Completed</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount">₹43,600.00</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Type</span>
+        <span class="value">USDT</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-09 12:42:28</span>
+    </div>
+    <div class="order-num">
+        <span class="label">Order number</span>
+        <span>WD202604091242289048563 9c <i class="far fa-copy" style="margin-left:4px; cursor:pointer;"></i></span>
+    </div>
+</div>
+
+<!-- Withdrawal Entry 2 -->
+<div class="withdraw-card">
+    <div class="card-top">
+        <span class="badge-withdraw">Withdraw</span>
+        <span class="status-completed"><i class="fas fa-check-circle"></i> Completed</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount">₹42,335.00</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Type</span>
+        <span class="value">USDT</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-08 13:36:54</span>
+    </div>
+    <div class="order-num">
+        <span class="label">Order number</span>
+        <span>WD20260408133654129711870b <i class="far fa-copy" style="margin-left:4px; cursor:pointer;"></i></span>
+    </div>
+</div>
+
+<!-- Withdrawal Entry 3 -->
+<div class="withdraw-card">
+    <div class="card-top">
+        <span class="badge-withdraw">Withdraw</span>
+        <span class="status-completed"><i class="fas fa-check-circle"></i> Completed</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount">₹40,890.00</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Type</span>
+        <span class="value">USDT</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-07 12:54:54</span>
+    </div>
+    <div class="order-num">
+        <span class="label">Order number</span>
+        <span>WD2026040712545474870202b <i class="far fa-copy" style="margin-left:4px; cursor:pointer;"></i></span>
+    </div>
+</div>
+
+<!-- Withdrawal Entry 4 -->
+<div class="withdraw-card">
+    <div class="card-top">
+        <span class="badge-withdraw">Withdraw</span>
+        <span class="status-completed"><i class="fas fa-check-circle"></i> Completed</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Balance</span>
+        <span class="amount">₹39,450.00</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Type</span>
+        <span class="value">USDT</span>
+    </div>
+    <div class="card-row">
+        <span class="label">Time</span>
+        <span class="value">2026-04-06 10:15:33</span>
+    </div>
+    <div class="order-num">
+        <span class="label">Order number</span>
+        <span>WD2026040610153312345678d <i class="far fa-copy" style="margin-left:4px; cursor:pointer;"></i></span>
+    </div>
+</div>
+
+<script>
+    const overlay = document.getElementById('overlay');
+    const sheet = document.getElementById('bottomSheet');
+    const display = document.getElementById('currentDate');
+    
+    const colYear = document.getElementById('colYear');
+    const colMonth = document.getElementById('colMonth');
+    const colDay = document.getElementById('colDay');
+    
+    function populateColumn(el, start, end, pad=false) {
+        let html = '';
+        for(let i=start; i<=end; i++) {
+            let val = pad && i < 10 ? '0'+i : i;
+            html += `<div class="picker-item" data-val="${val}">${val}</div>`;
+        }
+        el.innerHTML = html;
+        updateHighlight(el);
+    }
+
+    const today = new Date();
+    const curYear = today.getFullYear();
+    const curMonth = today.getMonth() + 1;
+    const curDay = today.getDate();
+
+    if(!display.innerText.includes('-') || display.innerText === '2026-04-18') {
+        display.innerText = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
+    }
+
+    populateColumn(colYear, 2020, curYear + 5);
+    populateColumn(colMonth, 1, 12, true);
+
+    function updateDays() {
+        let y = parseInt(getSelected(colYear) || curYear);
+        let m = parseInt(getSelected(colMonth) || curMonth);
+        let daysInMonth = new Date(y, m, 0).getDate();
+        let prevDay = getSelected(colDay);
+        
+        populateColumn(colDay, 1, daysInMonth, true);
+        
+        if(prevDay) {
+            let d = Math.min(parseInt(prevDay), daysInMonth);
+            scrollToVal(colDay, String(d).padStart(2, '0'));
+        }
+    }
+
+    updateDays();
+
+    function openPicker() {
+        overlay.style.display = 'block';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            sheet.style.bottom = '0';
+        }, 10);
+        
+        let parts = display.innerText !== 'Choose a date' && display.innerText.includes('-') ? 
+                    display.innerText.split('-') : 
+                    [String(curYear), String(curMonth).padStart(2,'0'), String(curDay).padStart(2,'0')];
+                    
+        scrollToVal(colYear, parts[0]);
+        scrollToVal(colMonth, parts[1]);
+        updateDays();
+        scrollToVal(colDay, parts[2]);
+    }
+
+    function closePicker() {
+        sheet.style.bottom = '-100%';
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    }
+    
+    function scrollToVal(column, val) {
+        let items = column.querySelectorAll('.picker-item');
+        for(let i=0; i<items.length; i++) {
+            if(items[i].dataset.val == val) {
+                column.scrollTop = i * 40;
+                break;
+            }
+        }
+        updateHighlight(column);
+    }
+
+    function updateHighlight(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        
+        items.forEach((item, idx) => {
+            item.style.color = (idx === centerIndex) ? 'var(--text-dark)' : 'var(--text-muted)';
+            item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
+        });
+    }
+
+    function handleScroll(column) {
+        updateHighlight(column);
+        if(column.id === 'colYear' || column.id === 'colMonth') {
+            updateDays();
+        }
+    }
+
+    function getSelected(column) {
+        let centerIndex = Math.round(column.scrollTop / 40);
+        let items = column.querySelectorAll('.picker-item');
+        if(items[centerIndex]) return items[centerIndex].dataset.val;
+        return "";
+    }
+
+    function confirmDate() {
+        let y = getSelected(colYear);
+        let m = getSelected(colMonth);
+        let d = getSelected(colDay);
+        if(y && m && d) {
+            display.innerText = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        }
+        closePicker();
+    }
+
+    // Copy order number
+    document.querySelectorAll('.fa-copy').forEach(icon => {
+        icon.addEventListener('click', function() {
+            const text = this.parentElement.textContent.trim().replace(' ', '');
+            navigator.clipboard.writeText(text).then(() => {
+                this.classList.replace('fa-copy', 'fa-check');
+                setTimeout(() => this.classList.replace('fa-check', 'fa-copy'), 1500);
+            });
+        });
+    });
+</script>
+
+{% endblock %}
