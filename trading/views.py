@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
@@ -126,3 +129,20 @@ def invitation_rules_view(request):
 @login_required
 def withdraw_history_view(request):
     return render(request, 'withdraw_history.html')
+
+def register(request):
+    if request.method == 'POST':
+        # Simple registration using phone number as username
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "This phone number is already registered.")
+            return redirect('login')
+            
+        user = User.objects.create_user(username=username, password=password)
+        login(request, user)
+        messages.success(request, "Registration successful!")
+        return redirect('account')
+        
+    return render(request, 'register.html')

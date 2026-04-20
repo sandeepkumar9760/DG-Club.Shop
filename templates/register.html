@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body { background-color: #f6f8fb; }
+    .login-container { padding: 0; }
+    .top-gradient-header {
+        background: linear-gradient(180deg, #ff8a8f 0%, #ff5e62 100%);
+        padding: 20px 20px 80px 20px;
+        color: white;
+        position: relative;
+    }
+    .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .header-nav .back-btn { color: white; font-size: 1.2rem; text-decoration: none; }
+    .header-nav .logo-text { font-size: 1.4rem; font-weight: 800; font-style: italic; letter-spacing: 1px; }
+    .logo-text { color: white; }
+    .subtitle-text { font-size: 0.85rem; line-height: 1.4; opacity: 0.95; }
+    .form-wrapper { padding: 20px; margin-top: -30px; }
+    .form-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: flex; align-items: center; gap: 8px; font-size: 1rem; color: var(--text-dark); margin-bottom: 10px; }
+    .form-label i { color: var(--primary-red); font-size: 1.2rem; }
+    .phone-input-group { display: flex; gap: 15px; }
+    .country-code {
+        width: 80px; background: #f6f8fb; border-radius: 10px;
+        display: flex; justify-content: center; align-items: center;
+        font-size: 1rem; color: var(--text-dark); border: none;
+    }
+    .phone-field, .password-field {
+        width: 100%; background: #f6f8fb; border: none; border-radius: 10px;
+        padding: 15px; font-size: 1rem; color: var(--text-dark); outline: none;
+    }
+    .btn-submit {
+        background: linear-gradient(135deg, #ff8a8f 0%, #ff5e62 100%);
+        width: 100%; color: white; border: none; padding: 15px;
+        border-radius: 30px; font-size: 1.2rem; font-weight: bold;
+        box-shadow: 0 4px 15px rgba(255, 94, 98, 0.3); margin-top: 20px;
+        cursor: pointer;
+    }
+    .btn-login-link {
+        display: block; text-align: center; margin-top: 20px;
+        color: var(--primary-red); text-decoration: none; font-weight: bold;
+    }
+</style>
+
+<div class="login-container">
+    <div class="top-gradient-header">
+        <div class="header-nav">
+            <a href="{% url 'login' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+            <div class="logo-text">DG CLUB</div>
+            <div style="width: 24px;"></div>
+        </div>
+        <div class="subtitle-text">
+            Register a new account<br>
+            Join the community and start trading
+        </div>
+    </div>
+    
+    <div class="form-wrapper">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-mobile-alt"></i> Phone number</div>
+                    <div class="phone-input-group">
+                        <div class="country-code">+91</div>
+                        <input type="text" name="username" class="phone-field" placeholder="Enter phone number" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-lock"></i> Password</div>
+                    <input type="password" name="password" class="password-field" placeholder="Set your password" required>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label"><i class="fas fa-check-circle"></i> Confirm Password</div>
+                    <input type="password" name="confirm_password" class="password-field" placeholder="Confirm your password" required>
+                </div>
+                
+                <button type="submit" class="btn-submit">Register</button>
+            </form>
+            <a href="{% url 'login' %}" class="btn-login-link">Already have an account? Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
