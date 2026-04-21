@@ -208,30 +208,30 @@
     const colMonth = document.getElementById('colMonth');
     const colDay = document.getElementById('colDay');
 
-    // Mock Data Store - 12+ Realistic Records with Status Support
+    // Mock Data Store - High-Volume Realistic Records
     const specificData = {
         "2026-04-21": [
-            { amount: 2100.00, type: "UPI", time: "2026-04-21 11:36:05", order: "WD2026042111360579120097b", status: "Completed" },
-            { amount: 2000.00, type: "UPI", time: "2026-04-21 10:15:33", order: "WD2026042110153312345678", status: "Rejected", remarks: "Hello, please make a new request of your withdrawal, thank you." },
-            { amount: 800.00, type: "UPI", time: "2026-04-21 09:20:11", order: "WD202604210920119827361", status: "Completed" }
+            { amount: 982500.00, type: "UPI", time: "2026-04-21 11:36:05", order: "WD2026042111360579120097b", status: "Completed" },
+            { amount: 815000.00, type: "Bank Card", time: "2026-04-21 10:15:33", order: "WD2026042110153312345678", status: "Completed" },
+            { amount: 12500.00, type: "UPI", time: "2026-04-21 09:20:11", order: "WD202604210920119827361", status: "Rejected", remarks: "Hello, please make a new request of your withdrawal, thank you." }
         ],
         "2026-04-20": [
-            { amount: 483600.00, type: "USDT", time: "2026-04-20 12:42:28", order: "WD202604201242289048563", status: "Completed" },
-            { amount: 312000.00, type: "Bank", time: "2026-04-20 10:15:33", order: "WD2026042010153312345678", status: "Completed" }
+            { amount: 740200.00, type: "ARWallet", time: "2026-04-20 12:42:28", order: "WD202604201242289048563", status: "Completed" },
+            { amount: 512000.00, type: "Bank Card", time: "2026-04-20 10:15:33", order: "WD2026042010153312345678", status: "Completed" }
         ],
         "2026-04-19": [
-            { amount: 342335.00, type: "Bank", time: "2026-04-19 13:36:54", order: "WD202604191336541297118", status: "Completed" },
+            { amount: 842335.00, type: "Bank Card", time: "2026-04-19 13:36:54", order: "WD202604191336541297118", status: "Completed" },
             { amount: 25000.00, type: "UPI", time: "2026-04-19 11:15:00", order: "WD202604191115009988776", status: "Rejected", remarks: "Bank server issue. Please try again after 2 hours." }
         ],
         "2026-04-18": [
             { amount: 540890.00, type: "USDT", time: "2026-04-18 12:54:54", order: "WD202604181254547487020", status: "Completed" },
-            { amount: 15600.00, type: "UPI", time: "2026-04-18 08:44:12", order: "WD202604180844123344556", status: "Completed" }
+            { amount: 915600.00, type: "BANK CARD", time: "2026-04-18 08:44:12", order: "WD202604180844123344556", status: "Completed" }
         ],
         "2026-04-17": [
-            { amount: 139450.00, type: "USDT", time: "2026-04-17 10:15:33", order: "WD202604171015331234567", status: "Completed" }
+            { amount: 739450.00, type: "ARWallet", time: "2026-04-17 10:15:33", order: "WD202604171015331234567", status: "Completed" }
         ],
         "2026-04-16": [
-            { amount: 845000.00, type: "Bank", time: "2026-04-16 11:20:44", order: "WD202604161120445566778", status: "Completed" },
+            { amount: 845000.00, type: "Bank Card", time: "2026-04-16 11:20:44", order: "WD202604161120445566778", status: "Completed" },
             { amount: 3000.00, type: "UPI", time: "2026-04-16 09:30:11", order: "WD202604160930119827361", status: "Rejected", remarks: "Incorrect account details provided." }
         ],
         "2026-04-15": [
