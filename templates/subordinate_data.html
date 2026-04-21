@@ -493,11 +493,11 @@
         let remaining = total;
         for(let i = 0; i < pieces - 1; i++) {
             let amount = Math.random() * (remaining / (pieces - i)) * 2;
-            amount = Math.round(amount * 100) / 100;
+            amount = Math.floor(amount); // Round to whole number
             distribution[i] = amount;
             remaining -= amount;
         }
-        distribution[pieces - 1] = Math.round(remaining * 100) / 100;
+        distribution[pieces - 1] = Math.max(0, Math.floor(remaining)); // Final piece as whole number
         return distribution;
     }
 
@@ -551,8 +551,9 @@
             let deposit = userDeps[i] || 0;
             let comm = commDist[i] || 0;
             
-            let depositStr = deposit === 0 ? "0" : deposit.toFixed(2);
-            let commStr = comm === 0 ? "0" : comm.toFixed(2);
+            // Round to whole numbers (round figures)
+            let depositStr = Math.floor(deposit).toString();
+            let commStr = Math.floor(comm).toString();
             
             html += `
             <div class="user-card">
