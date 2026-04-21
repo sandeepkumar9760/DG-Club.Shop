@@ -156,7 +156,7 @@
 
     let currentCategory = 'All';
 
-    // Mock Data Store - 15+ Structured Records
+    // Mock Data Store - 15+ Structured Records (Migrated from Withdrawals)
     const specificData = {
         "2026-04-21": [
             { type: "Game moved in", detail: "Game moved in", amount: 900.33, time: "2026-04-21 11:36:05" },
@@ -168,24 +168,40 @@
         ],
         "2026-04-19": [
             { type: "Game moved out", detail: "Game moved out", amount: 2100.00, time: "2026-04-19 14:42:28" },
-            { type: "Bonus", detail: "Referral bonus", amount: 5000.00, time: "2026-04-19 12:13:18" }
+            { type: "Bonus", detail: "Referral bonus", amount: 5000.00, time: "2026-04-19 12:13:18" },
+            { type: "Bonus", detail: "Agent salary", amount: 82500.00, time: "2026-04-19 14:42:28" },
+            { type: "Bonus", detail: "Agent salary", amount: 51200.00, time: "2026-04-19 10:15:33" }
         ],
         "2026-04-18": [
             { type: "Game moved in", detail: "Game moved in", amount: 742.00, time: "2026-04-18 12:42:28" },
-            { type: "Game moved out", detail: "Game moved out", amount: 550.00, time: "2026-04-18 09:20:11" }
+            { type: "Game moved out", detail: "Game moved out", amount: 550.00, time: "2026-04-18 09:20:11" },
+            { type: "Bonus", detail: "Agent salary", amount: 74200.00, time: "2026-04-18 12:42:28" }
         ],
         "2026-04-17": [
             { type: "Game moved in", detail: "Game moved in", amount: 900.33, time: "2026-04-17 12:24:46" },
             { type: "Game moved out", detail: "Game moved out", amount: 900.33, time: "2026-04-17 12:24:37" },
-            { type: "Bonus", detail: "Weekly agency award", amount: 125000.00, time: "2026-04-17 08:30:44" }
+            { type: "Bonus", detail: "Weekly agency award", amount: 125000.00, time: "2026-04-17 08:30:44" },
+            { type: "Bonus", detail: "Agent salary", amount: 64235.00, time: "2026-04-17 13:36:54" }
         ],
         "2026-04-16": [
             { type: "Game moved in", detail: "Game moved in", amount: 840.00, time: "2026-04-16 12:54:54" },
-            { type: "Game moved out", detail: "Game moved out", amount: 12000.00, time: "2026-04-16 08:44:12" }
+            { type: "Game moved out", detail: "Game moved out", amount: 12000.00, time: "2026-04-16 08:44:12" },
+            { type: "Bonus", detail: "Agent salary", amount: 84089.00, time: "2026-04-16 12:54:54" },
+            { type: "Bonus", detail: "Agent salary", amount: 95600.00, time: "2026-04-16 08:44:12" }
         ],
         "2026-04-15": [
             { type: "Game moved in", detail: "Game moved in", amount: 739.00, time: "2026-04-15 10:15:33" },
-            { type: "Bonus", detail: "First deposit bonus", amount: 500.00, time: "2026-04-15 09:30:11" }
+            { type: "Bonus", detail: "First deposit bonus", amount: 500.00, time: "2026-04-15 09:30:11" },
+            { type: "Bonus", detail: "Agent salary", amount: 73945.00, time: "2026-04-15 10:15:33" }
+        ],
+        "2026-04-14": [
+            { type: "Bonus", detail: "Agent salary", amount: 84500.00, time: "2026-04-14 11:20:44" }
+        ],
+        "2026-04-13": [
+            { type: "Bonus", detail: "Agent salary", amount: 92050.00, time: "2026-04-13 14:30:22" }
+        ],
+        "2026-04-12": [
+            { type: "Bonus", detail: "Agent salary", amount: 67800.00, time: "2026-04-12 15:15:15" }
         ]
     };
 
