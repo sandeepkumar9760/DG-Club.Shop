@@ -22,7 +22,7 @@
     }
 
     .badge-withdraw {
-        background: #ff6b6b; /* Exact coral red from screenshot */
+        background: #ff6b6b;
         color: white;
         padding: 5px 16px;
         border-radius: 6px;
@@ -32,12 +32,6 @@
 
     .status-completed {
         color: #34d399;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-
-    .status-rejected {
-        color: #ff8a8f;
         font-size: 0.85rem;
         font-weight: bold;
     }
@@ -62,97 +56,17 @@
         margin-top: 5px;
     }
 
-    .remarks-box {
-        background: #f1f5f9;
-        color: #1e293b;
-        padding: 12px 15px;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        margin-top: 15px;
-        line-height: 1.5;
-    }
-
-    .filter-tabs {
-        display: flex;
-        gap: 12px;
-        padding: 15px;
-        overflow-x: auto;
-        background: #ffffff;
-        margin-bottom: 15px;
-    }
-
-    .tab {
-        padding: 10px 20px;
-        background: #f8fafc;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 0.85rem;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-    }
-
-    .tab.active { background: #ff6b6b; color: white; border: none; }
-
-    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; background: #f6f7fa; }
-    .filter-select {
-        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-        background: #ffffff; color: #333333; outline: none; font-size: 0.9rem;
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat; background-position: right 10px center; background-size: 15px;
-    }
-    .custom-date-box {
-        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
-        background: #ffffff; color: #333333; font-size: 0.9rem;
-        display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-    }
-
     .header-basic {
         background: #ffffff;
         border-bottom: 1px solid #f1f5f9;
         color: #333333;
         font-weight: bold;
+        position: sticky;
+        top: 0;
+        z-index: 100;
     }
     
     .back-btn i { color: #333333; }
-
-    /* Picker styles */
-    .modal-overlay {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
-    }
-    .bottom-sheet {
-        position: fixed; bottom: -100%; left: 0; right: 0;
-        background: #ffffff; border-top-left-radius: 20px; border-top-right-radius: 20px;
-        z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
-        color: #333333;
-    }
-    .sheet-header {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 15px 20px; border-bottom: 1px solid #f1f5f9; font-size: 1rem;
-    }
-    .sheet-header .cancel { color: #64748b; cursor: pointer; }
-    .sheet-header .title { font-weight: bold; }
-    .sheet-header .confirm { color: #ff6b6b; cursor: pointer; }
-    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
-    .picker-column {
-        flex: 1; height: 100%; overflow-y: auto;
-        scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0;
-    }
-    .picker-column::-webkit-scrollbar { display: none; }
-    .picker-item {
-        height: 40px; display: flex; justify-content: center; align-items: center;
-        scroll-snap-align: center; font-size: 1.1rem; color: #64748b; transition: color 0.2s;
-    }
-    .picker-highlight {
-        position: absolute; top: 80px; left: 0; right: 0; height: 40px;
-        border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
-        pointer-events: none;
-    }
 </style>
 
 <div class="header-basic">
@@ -160,55 +74,12 @@
     Withdrawal history
 </div>
 
-<div class="filter-tabs">
-    <div class="tab active"><i class="fas fa-th-large"></i> All</div>
-    <div class="tab"><i class="fas fa-wallet"></i> ARWallet</div>
-    <div class="tab"><i class="fas fa-university"></i> BANK CARD</div>
-</div>
-
-<div class="dropdown-filters">
-    <select class="filter-select">
-        <option>All</option>
-        <option>USDT</option>
-        <option>Bank</option>
-    </select>
-    <div class="custom-date-box" onclick="openPicker()">
-        <span id="currentDate">Choose a date</span>
-        <i class="fas fa-chevron-down" style="color: #64748b;"></i>
-    </div>
-</div>
-
-<!-- Date Picker Modal -->
-<div class="modal-overlay" id="overlay" onclick="closePicker()"></div>
-<div class="bottom-sheet" id="bottomSheet">
-    <div class="sheet-header">
-        <div class="cancel" onclick="closePicker()">Cancel</div>
-        <div class="title">Choose a date</div>
-        <div class="confirm" onclick="confirmDate()">Confirm</div>
-    </div>
-    <div class="picker-container">
-        <div class="picker-highlight"></div>
-        <div class="picker-column" id="colYear" onscroll="handleScroll(this)"></div>
-        <div class="picker-column" id="colMonth" onscroll="handleScroll(this)"></div>
-        <div class="picker-column" id="colDay" onscroll="handleScroll(this)"></div>
-    </div>
-</div>
-
-<!-- Dynamic List Container -->
-<div id="withdraw-list" style="padding-bottom: 30px;">
+<div id="withdraw-list" style="padding-top: 20px; padding-bottom: 30px;">
     <!-- Populated by JS -->
 </div>
 
 <script>
-    const overlay = document.getElementById('overlay');
-    const sheet = document.getElementById('bottomSheet');
-    const display = document.getElementById('currentDate');
-    
-    const colYear = document.getElementById('colYear');
-    const colMonth = document.getElementById('colMonth');
-    const colDay = document.getElementById('colDay');
-
-    // Mock Data Store - Specific Date & Amount Range (April 12-19, ₹50k-₹100k)
+    // Mock Data Store - (April 12-19)
     const specificData = {
         "2026-04-19": [
             { amount: 82500.00, type: "UPI", time: "2026-04-19 14:42:28", order: "WD202604191442289048563", status: "Completed" },
@@ -216,19 +87,19 @@
         ],
         "2026-04-18": [
             { amount: 74200.00, type: "ARWallet", time: "2026-04-18 12:42:28", order: "WD202604181242289048563", status: "Completed" },
-            { amount: 915000.00, type: "UPI", time: "2026-04-18 09:20:11", order: "WD202604180920119827361", status: "Rejected", remarks: "Hello, please make a new request of your withdrawal, thank you." }
+            { amount: 91500.00, type: "UPI", time: "2026-04-18 09:20:11", order: "WD202604180920119827361", status: "Rejected" }
         ],
         "2026-04-17": [
             { amount: 64235.00, type: "Bank Card", time: "2026-04-17 13:36:54", order: "WD202604171336541297118", status: "Completed" },
-            { amount: 55000.00, type: "UPI", time: "2026-04-17 11:15:00", order: "WD202604171115009988776", status: "Rejected", remarks: "Bank server issue. Please try again later." }
+            { amount: 55000.00, type: "UPI", time: "2026-04-17 11:15:00", order: "WD202604171115009988776", status: "Rejected" }
         ],
         "2026-04-16": [
-            { amount: 840890.0 / 10, amount: 84089.00, type: "USDT", time: "2026-04-16 12:54:54", order: "WD202604161254547487020", status: "Completed" },
+            { amount: 84089.00, type: "USDT", time: "2026-04-16 12:54:54", order: "WD202604161254547487020", status: "Completed" },
             { amount: 95600.00, type: "BANK CARD", time: "2026-04-16 08:44:12", order: "WD202604160844123344556", status: "Completed" }
         ],
         "2026-04-15": [
             { amount: 73945.00, type: "ARWallet", time: "2026-04-15 10:15:33", order: "WD202604151015331234567", status: "Completed" },
-            { amount: 56000.00, type: "UPI", time: "2026-04-15 09:30:11", order: "WD202604150930119827361", status: "Rejected", remarks: "Incorrect account details." }
+            { amount: 56000.00, type: "UPI", time: "2026-04-15 09:30:11", order: "WD202604150930119827361", status: "Rejected" }
         ],
         "2026-04-14": [
             { amount: 84500.00, type: "Bank Card", time: "2026-04-14 11:20:44", order: "WD202604141120445566778", status: "Completed" }
@@ -241,28 +112,38 @@
         ]
     };
 
-    function renderWithdrawals(dateStr) {
+    function renderWithdrawals() {
         const listContainer = document.getElementById('withdraw-list');
-        const data = specificData[dateStr] || [];
         
-        if (data.length === 0) {
+        // Flatten all arrays from specificData into one list
+        let allRecords = [];
+        Object.values(specificData).forEach(dayArray => {
+            allRecords = allRecords.concat(dayArray);
+        });
+
+        // Filter out any Rejected status
+        const completedRecords = allRecords.filter(item => item.status === 'Completed');
+        
+        // Sort by time descending (optional, but better experience)
+        completedRecords.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        if (completedRecords.length === 0) {
             listContainer.innerHTML = `
                 <div class="empty-state" style="padding: 100px 20px; text-align: center; color: #94a3b8;">
                     <i class="fas fa-file-invoice" style="font-size: 80px; color: #e2e8f0; margin-bottom: 20px;"></i>
-                    <p>No data</p>
+                    <p>No completed withdrawals</p>
                 </div>
             `;
             return;
         }
 
         let html = '';
-        data.forEach(item => {
-            const statusClass = item.status === 'Completed' ? 'status-completed' : 'status-rejected';
+        completedRecords.forEach(item => {
             html += `
             <div class="withdraw-card">
                 <div class="card-top">
                     <span class="badge-withdraw">Withdraw</span>
-                    <span class="${statusClass}">${item.status}</span>
+                    <span class="status-completed">Completed</span>
                 </div>
                 <div class="card-row">
                     <span class="label">Balance</span>
@@ -277,10 +158,9 @@
                     <span class="value">${item.time}</span>
                 </div>
                 <div class="order-num">
-                    <span class=\"label\">Order number</span>
+                    <span class="label">Order number</span>
                     <span class="value">${item.order} <i class="far fa-copy" style="margin-left:4px; cursor:pointer;" onclick="copyOrder('${item.order}', this)"></i></span>
                 </div>
-                ${item.remarks ? `<div class="remarks-box">${item.remarks}</div>` : ''}
             </div>
             `;
         });
@@ -293,101 +173,9 @@
             setTimeout(() => icon.classList.replace('fa-check', 'fa-copy'), 1500);
         });
     }
-    
-    function populateColumn(el, start, end, pad=false) {
-        let html = '';
-        for(let i=start; i<=end; i++) {
-            let val = pad && i < 10 ? '0'+i : i;
-            html += `<div class="picker-item" data-val="${val}">${val}</div>`;
-        }
-        el.innerHTML = html;
-    }
 
-    const today = new Date();
-    const curYear = today.getFullYear();
-    const curMonth = today.getMonth() + 1;
-    const curDay = today.getDate();
-
-    const initialDate = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
-    display.innerText = initialDate;
-
-    populateColumn(colYear, 2020, curYear + 5);
-    populateColumn(colMonth, 1, 12, true);
-
-    function updateDays() {
-        let y = parseInt(getSelected(colYear) || curYear);
-        let m = parseInt(getSelected(colMonth) || curMonth);
-        let daysInMonth = new Date(y, m, 0).getDate();
-        let prevDay = getSelected(colDay);
-        
-        populateColumn(colDay, 1, daysInMonth, true);
-        
-        if(prevDay) {
-            let d = Math.min(parseInt(prevDay), daysInMonth);
-            scrollToVal(colDay, String(d).padStart(2, '0'));
-        }
-    }
-
-    updateDays();
-    renderWithdrawals(initialDate);
-
-    function openPicker() {
-        overlay.style.display = 'block';
-        setTimeout(() => {
-            overlay.style.opacity = '1';
-            sheet.style.bottom = '0';
-        }, 10);
-        
-        let parts = display.innerText !== 'Choose a date' && display.innerText.includes('-') ? 
-                    display.innerText.split('-') : 
-                    [String(curYear), String(curMonth).padStart(2,'0'), String(curDay).padStart(2,'0')];
-                    
-        scrollToVal(colYear, parts[0]);
-        scrollToVal(colMonth, parts[1]);
-        updateDays();
-        scrollToVal(colDay, parts[2]);
-    }
-
-    function closePicker() {
-        sheet.style.bottom = '-100%';
-        overlay.style.opacity = '0';
-        setTimeout(() => { overlay.style.display = 'none'; }, 300);
-    }
-    
-    function scrollToVal(column, val) {
-        let items = column.querySelectorAll('.picker-item');
-        for(let i=0; i<items.length; i++) {
-            if(items[i].dataset.val == val) {
-                column.scrollTop = i * 40;
-                break;
-            }
-        }
-    }
-
-    function handleScroll(column) {
-        if(column.id === 'colYear' || column.id === 'colMonth') {
-            updateDays();
-        }
-    }
-
-    function getSelected(column) {
-        let centerIndex = Math.round(column.scrollTop / 40);
-        let items = column.querySelectorAll('.picker-item');
-        if(items[centerIndex]) return items[centerIndex].dataset.val;
-        return "";
-    }
-
-    function confirmDate() {
-        let y = getSelected(colYear);
-        let m = getSelected(colMonth);
-        let d = getSelected(colDay);
-        if(y && m && d) {
-            let dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-            display.innerText = dateStr;
-            renderWithdrawals(dateStr);
-        }
-        closePicker();
-    }
+    // Initial load
+    renderWithdrawals();
 </script>
 
 {% endblock %}
