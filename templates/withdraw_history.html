@@ -36,6 +36,12 @@
         font-weight: bold;
     }
 
+    .status-rejected {
+        color: #ff4d4d;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
     .card-row {
         display: flex;
         justify-content: space-between;
@@ -121,29 +127,27 @@
             allRecords = allRecords.concat(dayArray);
         });
 
-        // Filter out any Rejected status
-        const completedRecords = allRecords.filter(item => item.status === 'Completed');
-        
-        // Sort by time descending (optional, but better experience)
-        completedRecords.sort((a, b) => new Date(b.time) - new Date(a.time));
+        // Sort by time descending
+        allRecords.sort((a, b) => new Date(b.time) - new Date(a.time));
 
-        if (completedRecords.length === 0) {
+        if (allRecords.length === 0) {
             listContainer.innerHTML = `
                 <div class="empty-state" style="padding: 100px 20px; text-align: center; color: #94a3b8;">
                     <i class="fas fa-file-invoice" style="font-size: 80px; color: #e2e8f0; margin-bottom: 20px;"></i>
-                    <p>No completed withdrawals</p>
+                    <p>No withdrawals found</p>
                 </div>
             `;
             return;
         }
 
         let html = '';
-        completedRecords.forEach(item => {
+        allRecords.forEach(item => {
+            const statusClass = item.status === 'Completed' ? 'status-completed' : 'status-rejected';
             html += `
             <div class="withdraw-card">
                 <div class="card-top">
                     <span class="badge-withdraw">Withdraw</span>
-                    <span class="status-completed">Completed</span>
+                    <span class="${statusClass}">${item.status}</span>
                 </div>
                 <div class="card-row">
                     <span class="label">Balance</span>
