@@ -2,12 +2,15 @@
 
 {% block content %}
 <style>
+    body { background-color: #1a1a3a !important; }
+    
     .withdraw-card {
-        background: white;
+        background: #2b2b4b;
         margin: 0 15px 12px 15px;
         border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 18px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.05);
     }
 
     .card-top {
@@ -16,20 +19,21 @@
         align-items: center;
         margin-bottom: 12px;
         padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .badge-withdraw {
-        background: var(--primary-red);
+        background: #ba2d31;
         color: white;
-        padding: 4px 14px;
+        padding: 5px 16px;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: bold;
+        text-transform: capitalize;
     }
 
     .status-completed {
-        color: var(--accent-green);
+        color: #34d399;
         font-size: 0.85rem;
         font-weight: 500;
     }
@@ -37,20 +41,21 @@
     .card-row {
         display: flex;
         justify-content: space-between;
-        font-size: 0.85rem;
-        margin-bottom: 8px;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
     }
 
-    .card-row .label { color: var(--text-muted); }
-    .card-row .value { font-weight: 500; color: var(--text-dark); }
-    .card-row .amount { font-weight: bold; color: var(--text-dark); font-size: 0.95rem; }
+    .card-row .label { color: #8e8eaf; }
+    .card-row .value { font-weight: 500; color: #ffffff; }
+    .card-row .amount { font-weight: bold; color: #f59e0b; font-size: 1.05rem; }
 
     .order-num {
         font-size: 0.75rem;
-        color: var(--text-muted);
+        color: #8e8eaf;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-top: 5px;
     }
 
     .filter-tabs {
@@ -58,12 +63,12 @@
         gap: 10px;
         padding: 15px;
         overflow-x: auto;
-        background: var(--bg-color);
+        background: #1a1a3a;
     }
 
     .tab {
         padding: 10px 20px;
-        background: white;
+        background: #2b2b4b;
         border-radius: 8px;
         font-weight: 500;
         font-size: 0.85rem;
@@ -71,44 +76,53 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        color: var(--text-dark);
-        border: 1px solid var(--border-color);
+        color: #ffffff;
+        border: 1px solid rgba(255,255,255,0.1);
     }
 
     .tab.active { background: var(--primary-gradient); color: white; border: none; }
 
-    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; }
+    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; background: #1a1a3a; }
     .filter-select {
-        flex: 1; padding: 12px; border-radius: 8px; border: none;
-        background: white; color: var(--text-dark); outline: none; font-size: 0.9rem;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+        background: #2b2b4b; color: #ffffff; outline: none; font-size: 0.9rem;
         appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' stroke='white' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
         background-repeat: no-repeat; background-position: right 10px center; background-size: 15px;
     }
     .custom-date-box {
-        flex: 1; padding: 12px; border-radius: 8px; border: none;
-        background: white; color: var(--text-dark); font-size: 0.9rem;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+        background: #2b2b4b; color: #ffffff; font-size: 0.9rem;
         display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     }
+
+    .header-basic {
+        background: #1a1a3a !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        color: white !important;
+    }
+    
+    .back-btn i { color: white !important; }
 
     /* Picker styles */
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
+        background: rgba(0,0,0,0.7); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
     }
     .bottom-sheet {
         position: fixed; bottom: -100%; left: 0; right: 0;
-        background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        background: #2b2b4b; border-top-left-radius: 20px; border-top-right-radius: 20px;
         z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
+        color: white;
     }
     .sheet-header {
         display: flex; justify-content: space-between; align-items: center;
-        padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1rem;
+        padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1rem;
     }
-    .sheet-header .cancel { color: var(--text-muted); cursor: pointer; }
+    .sheet-header .cancel { color: #8e8eaf; cursor: pointer; }
     .sheet-header .title { font-weight: bold; }
-    .sheet-header .confirm { color: var(--primary-red); cursor: pointer; }
-    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
+    .sheet-header .confirm { color: #ba2d31; cursor: pointer; }
+    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; background: #2b2b4b; }
     .picker-column {
         flex: 1; height: 100%; overflow-y: auto;
         scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0;
@@ -116,11 +130,11 @@
     .picker-column::-webkit-scrollbar { display: none; }
     .picker-item {
         height: 40px; display: flex; justify-content: center; align-items: center;
-        scroll-snap-align: center; font-size: 1.1rem; color: var(--text-muted); transition: color 0.2s;
+        scroll-snap-align: center; font-size: 1.1rem; color: #8e8eaf; transition: color 0.2s;
     }
     .picker-highlight {
         position: absolute; top: 80px; left: 0; right: 0; height: 40px;
-        border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+        border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
         pointer-events: none;
     }
 </style>
@@ -144,7 +158,7 @@
     </select>
     <div class="custom-date-box" onclick="openPicker()">
         <span id="currentDate">Choose a date</span>
-        <i class="fas fa-chevron-down" style="color: var(--text-muted);"></i>
+        <i class="fas fa-chevron-down" style="color: #8e8eaf;"></i>
     </div>
 </div>
 
@@ -165,7 +179,7 @@
 </div>
 
 <!-- Dynamic List Container -->
-<div id="withdraw-list">
+<div id="withdraw-list" style="background: #1a1a3a; min-height: calc(100vh - 200px); padding-bottom: 30px;">
     <!-- Populated by JS -->
 </div>
 
@@ -178,7 +192,7 @@
     const colMonth = document.getElementById('colMonth');
     const colDay = document.getElementById('colDay');
 
-    // Mock Data Store
+    // Mock Data Store - 10+ Realistic Records
     const specificData = {
         "2026-04-19": [
             { amount: 483600.00, type: "USDT", time: "2026-04-19 12:42:28", order: "WD202604191242289048563" },
@@ -224,8 +238,8 @@
         
         if (data.length === 0) {
             listContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e5e7eb; margin-bottom: 15px;"></i>
+                <div class="empty-state" style="padding: 60px 20px; text-align: center; color: #8e8eaf;">
+                    <i class="fas fa-file-invoice" style="font-size: 80px; color: rgba(255,255,255,0.1); margin-bottom: 20px;"></i>
                     <p>No data</p>
                 </div>
             `;
@@ -254,7 +268,7 @@
                 </div>
                 <div class="order-num">
                     <span class="label">Order number</span>
-                    <span>${item.order} <i class="far fa-copy" style="margin-left:4px; cursor:pointer;" onclick="copyOrder('${item.order}', this)"></i></span>
+                    <span class="value">${item.order} <i class="far fa-copy" style="margin-left:4px; cursor:pointer;" onclick="copyOrder('${item.order}', this)"></i></span>
                 </div>
             </div>
             `;
@@ -346,7 +360,7 @@
         let items = column.querySelectorAll('.picker-item');
         
         items.forEach((item, idx) => {
-            item.style.color = (idx === centerIndex) ? 'var(--text-dark)' : 'var(--text-muted)';
+            item.style.color = (idx === centerIndex) ? '#ffffff' : '#8e8eaf';
             item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
         });
     }
