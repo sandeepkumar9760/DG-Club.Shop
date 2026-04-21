@@ -122,35 +122,10 @@
     </div>
 </div>
 
-{% if trades %}
-    {% for trade in trades %}
-    <div class="tx-item">
-        <div>
-            <div style="font-weight: 500; font-size: 0.95rem;">
-                Bet: ₹{{ trade.amount }} on
-                <span style="padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; color: white;
-                    background: {% if trade.color == 'RED' %}#ff5e62{% elif trade.color == 'GREEN' %}#34d399{% else %}#8b5cf6{% endif %};">
-                    {{ trade.color }}
-                </span>
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
-                Round {{ trade.round.round_id }} &nbsp;·&nbsp; Result:
-                <strong>{{ trade.round.result|default:"Pending" }}</strong>
-            </div>
-        </div>
-        <div class="{% if trade.status == 'WIN' %}tx-win{% elif trade.status == 'LOSS' %}tx-loss{% else %}tx-pending{% endif %}">
-            {% if trade.status == 'WIN' %}+₹{{ trade.payout }}
-            {% elif trade.status == 'LOSS' %}-₹{{ trade.amount }}
-            {% else %}PENDING{% endif %}
-        </div>
-    </div>
-    {% endfor %}
-{% else %}
-    <div class="empty-state">
-        <i class="fas fa-file-invoice" style="font-size: 100px; color: #e5e7eb;"></i>
-        <p>No data</p>
-    </div>
-{% endif %}
+<!-- Dynamic List Container -->
+<div id="game-history-list">
+    <!-- Populated by JS -->
+</div>
 
 <script>
     const overlay = document.getElementById('overlay');
@@ -160,7 +135,83 @@
     const colYear = document.getElementById('colYear');
     const colMonth = document.getElementById('colMonth');
     const colDay = document.getElementById('colDay');
-    
+
+    let currentFilter = 'All';
+
+    // Mock Data Store
+    const specificData = {
+        "2026-04-19": [
+            { amount: 150000, color: "RED", round: "20260419082", status: "WIN", payout: 294000, time: "2026-04-19 12:45:22" },
+            { amount: 80000, color: "GREEN", round: "20260419081", status: "LOSS", payout: 0, time: "2026-04-19 12:40:11" },
+            { amount: 250000, color: "VIOLET", round: "20260419080", status: "WIN", payout: 588000, time: "2026-04-19 12:35:54" }
+        ],
+        "2026-04-18": [
+            { amount: 120000, color: "GREEN", round: "20260418045", status: "WIN", payout: 235200, time: "2026-04-18 11:36:54" },
+            { amount: 50000, color: "RED", round: "20260418044", status: "LOSS", payout: 0, time: "2026-04-18 11:30:12" }
+        ],
+        "2026-04-17": [
+            { amount: 450000, color: "RED", round: "20260417012", status: "WIN", payout: 882000, time: "2026-04-17 10:54:54" },
+            { amount: 100000, color: "GREEN", round: "20260417011", status: "LOSS", payout: 0, time: "2026-04-17 10:45:33" }
+        ],
+        "2026-04-16": [
+            { amount: 320000, color: "RED", round: "20260416098", status: "WIN", payout: 627200, time: "2026-04-16 14:15:33" }
+        ]
+    };
+
+    function renderHistory() {
+        const listContainer = document.getElementById('game-history-list');
+        const dateStr = display.innerText;
+        let data = specificData[dateStr] || [];
+        
+        if (currentFilter !== 'All') {
+            data = data.filter(item => item.status === currentFilter.toUpperCase());
+        }
+
+        if (data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice" style="font-size: 100px; color: #e5e7eb;"></i>
+                    <p>No data</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.forEach(item => {
+            const colorCode = item.color === 'RED' ? '#ff5e62' : (item.color === 'GREEN' ? '#34d399' : '#8b5cf6');
+            html += `
+            <div class="tx-item">
+                <div>
+                    <div style="font-weight: 500; font-size: 0.95rem;">
+                        Bet: ₹${item.amount.toLocaleString('en-IN')} on
+                        <span style="padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; color: white; background: ${colorCode};">
+                            ${item.color}
+                        </span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">
+                        Round ${item.round} &nbsp;·&nbsp; Time: ${item.time}
+                    </div>
+                </div>
+                <div class="${item.status === 'WIN' ? 'tx-win' : 'tx-loss'}">
+                    ${item.status === 'WIN' ? '+₹' + item.payout.toLocaleString('en-IN') : '-₹' + item.amount.toLocaleString('en-IN')}
+                </div>
+            </div>
+            `;
+        });
+        listContainer.innerHTML = html;
+    }
+
+    // Tab Filtering
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.textContent.trim();
+            renderHistory();
+        });
+    });
+
     function populateColumn(el, start, end, pad=false) {
         let html = '';
         for(let i=start; i<=end; i++) {
@@ -176,9 +227,8 @@
     const curMonth = today.getMonth() + 1;
     const curDay = today.getDate();
 
-    if(!display.innerText.includes('-') || display.innerText === '2026-04-18') {
-        display.innerText = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
-    }
+    const initialDate = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
+    display.innerText = initialDate;
 
     populateColumn(colYear, 2020, curYear + 5);
     populateColumn(colMonth, 1, 12, true);
@@ -198,6 +248,7 @@
     }
 
     updateDays();
+    renderHistory(); // Initial render
 
     function openPicker() {
         overlay.style.display = 'block';
@@ -262,7 +313,9 @@
         let m = getSelected(colMonth);
         let d = getSelected(colDay);
         if(y && m && d) {
-            display.innerText = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            display.innerText = dateStr;
+            renderHistory();
         }
         closePicker();
     }

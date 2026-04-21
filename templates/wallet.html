@@ -204,72 +204,10 @@
     </div>
 </div>
 
-<!-- Static Bonus Transactions from screenshot -->
-<div class="tx-card">
-    <div class="badge-bonus">Bonus</div>
-    <div class="card-row">
-        <span class="label">Detail</span>
-        <span class="value">Bonus</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Time</span>
-        <span class="value">2026-04-09 12:13:18</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Balance</span>
-        <span class="amount-green">₹23,422.00</span>
-    </div>
-    <div class="card-note">ads fee</div>
+<!-- Dynamic List Container -->
+<div id="transaction-list">
+    <!-- Populated by JS -->
 </div>
-
-<div class="tx-card">
-    <div class="badge-bonus">Bonus</div>
-    <div class="card-row">
-        <span class="label">Detail</span>
-        <span class="value">Bonus</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Time</span>
-        <span class="value">2026-04-09 11:13:53</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Balance</span>
-        <span class="amount-green">₹13,000.00</span>
-    </div>
-    <div class="card-note">agent salary</div>
-</div>
-
-<div class="tx-card">
-    <div class="badge-bonus">Bonus</div>
-    <div class="card-row">
-        <span class="label">Detail</span>
-        <span class="value">Bonus</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Time</span>
-        <span class="value">2026-04-08 09:45:22</span>
-    </div>
-    <div class="card-row">
-        <span class="label">Balance</span>
-        <span class="amount-green">₹8,500.00</span>
-    </div>
-    <div class="card-note">referral bonus</div>
-</div>
-
-<!-- Dynamic DB transactions -->
-{% if transactions %}
-    {% for tx in transactions %}
-    <div class="tx-item">
-        <div>
-            <div style="font-weight: 500; font-size: 0.95rem;">{{ tx.transaction_type }}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">{{ tx.timestamp|date:"Y-m-d H:i:s" }}</div>
-        </div>
-        <div class="tx-amount {% if tx.transaction_type in 'WIN,DEPOSIT' %}tx-green{% else %}tx-red{% endif %}">
-            {% if tx.transaction_type in 'WIN,DEPOSIT' %}+{% else %}-{% endif %}₹{{ tx.amount }}
-        </div>
-    </div>
-    {% endfor %}
-{% endif %}
 
 <script>
     const overlay = document.getElementById('overlay');
@@ -279,7 +217,118 @@
     const colYear = document.getElementById('colYear');
     const colMonth = document.getElementById('colMonth');
     const colDay = document.getElementById('colDay');
-    
+
+    let currentCategory = 'All';
+
+    // Mock Data Store
+    const specificData = {
+        "2026-04-19": [
+            { type: "Bonus", amount: 823422.00, time: "2026-04-19 12:13:18", note: "Referral bonus" },
+            { type: "Deposit", amount: 1500000.00, time: "2026-04-19 10:45:22", note: "UPI Deposit" },
+            { type: "Withdraw", amount: 483600.00, time: "2026-04-19 12:42:28", note: "USDT Withdrawal" }
+        ],
+        "2026-04-18": [
+            { type: "Bonus", amount: 213000.00, time: "2026-04-18 11:13:53", note: "Agent salary" },
+            { type: "Deposit", amount: 500000.00, time: "2026-04-18 09:20:11", note: "Direct bank deposit" },
+            { type: "Withdraw", amount: 342335.00, time: "2026-04-18 13:36:54", note: "Bank Withdrawal" }
+        ],
+        "2026-04-17": [
+            { type: "Bonus", amount: 95500.00, time: "2026-04-17 09:45:22", note: "ADS fee" },
+            { type: "Deposit", amount: 1200000.00, time: "2026-04-17 08:30:44", note: "External Wallet" },
+            { type: "Withdraw", amount: 540890.00, time: "2026-04-17 12:54:54", note: "USDT Withdrawal" }
+        ],
+        "2026-04-16": [
+            { type: "Bonus", amount: 150000.00, time: "2026-04-16 14:22:11", note: "Performance bonus" },
+            { type: "Deposit", amount: 850000.00, time: "2026-04-16 11:20:44", note: "UPI Deposit" }
+        ],
+        "2026-04-15": [
+            { type: "Bonus", amount: 320000.00, time: "2026-04-15 11:11:11", note: "Monthly award" },
+            { type: "Withdraw", amount: 920500.00, time: "2026-04-15 14:30:22", note: "High volume withdrawal" }
+        ]
+    };
+
+    function renderTransactions() {
+        const listContainer = document.getElementById('transaction-list');
+        const dateStr = display.innerText;
+        let data = specificData[dateStr] || [];
+        
+        if (currentCategory !== 'All') {
+            data = data.filter(item => item.type === currentCategory);
+        }
+
+        if (data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e5e7eb; margin-bottom: 20px;"></i>
+                    <p>No data</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.forEach(item => {
+            if (item.type === 'Bonus') {
+                html += `
+                <div class="tx-card">
+                    <div class="badge-bonus">Bonus</div>
+                    <div class="card-row">
+                        <span class="label">Detail</span>
+                        <span class="value">Bonus</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="label">Time</span>
+                        <span class="value">${item.time}</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="label">Balance</span>
+                        <span class="amount-green">₹${item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="card-note">${item.note}</div>
+                </div>
+                `;
+            } else {
+                const isPositive = ['Deposit', 'Bonus', 'WIN'].includes(item.type);
+                html += `
+                <div class="tx-item">
+                    <div>
+                        <div style="font-weight: 500; font-size: 0.95rem;">${item.type}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">${item.time}</div>
+                    </div>
+                    <div class="tx-amount ${isPositive ? 'tx-green' : 'tx-red'}">
+                        ${isPositive ? '+' : '-'}₹${item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                    </div>
+                </div>
+                `;
+            }
+        });
+        listContainer.innerHTML = html;
+    }
+
+    // Tab Switching Logic
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.textContent.trim();
+            renderTransactions();
+        });
+    });
+
+    // Dropdown Select Logic
+    document.querySelector('.filter-select').addEventListener('change', function() {
+        currentCategory = this.value;
+        // Update tabs to match selection
+        document.querySelectorAll('.tab').forEach(t => {
+            if (t.textContent.trim() === currentCategory) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+        renderTransactions();
+    });
+
     function populateColumn(el, start, end, pad=false) {
         let html = '';
         for(let i=start; i<=end; i++) {
@@ -295,9 +344,8 @@
     const curMonth = today.getMonth() + 1;
     const curDay = today.getDate();
 
-    if(!display.innerText.includes('-') || display.innerText === '2026-04-18') {
-        display.innerText = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
-    }
+    const initialDate = `${curYear}-${String(curMonth).padStart(2,'0')}-${String(curDay).padStart(2,'0')}`;
+    display.innerText = initialDate;
 
     populateColumn(colYear, 2020, curYear + 5);
     populateColumn(colMonth, 1, 12, true);
@@ -317,6 +365,7 @@
     }
 
     updateDays();
+    renderTransactions(); // Initial Render
 
     function openPicker() {
         overlay.style.display = 'block';
@@ -381,7 +430,9 @@
         let m = getSelected(colMonth);
         let d = getSelected(colDay);
         if(y && m && d) {
-            display.innerText = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let dateStr = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            display.innerText = dateStr;
+            renderTransactions();
         }
         closePicker();
     }
