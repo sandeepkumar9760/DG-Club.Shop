@@ -2,117 +2,93 @@
 
 {% block content %}
 <style>
-    .filter-tabs {
-        display: flex;
-        gap: 10px;
-        padding: 15px;
-        overflow-x: auto;
-        background: var(--bg-color);
-    }
-    
-    .tab {
-        padding: 10px 20px;
-        background: white;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 0.85rem;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--text-dark);
-        border: 1px solid var(--border-color);
-    }
-    
-    .tab.active {
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-    }
+<style>
+    body { background-color: #f6f7fa !important; }
 
     .dropdown-filters {
         display: flex;
-        gap: 10px;
-        padding: 0 15px 15px 15px;
+        gap: 12px;
+        padding: 15px;
+        background: #f6f7fa;
     }
     
     .filter-select {
-        flex: 1;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        background: white;
-        color: var(--text-dark);
-        outline: none;
-        font-size: 0.9rem;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+        background: #ffffff; color: #333333; outline: none; font-size: 0.9rem;
         appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        background-size: 15px;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat; background-position: right 10px center; background-size: 15px;
     }
-
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 20px;
-        color: #c0c4cc;
-    }
-
-    .empty-state i {
-        font-size: 80px;
-        margin-bottom: 20px;
-        opacity: 0.5;
-    }
-
-    .tx-item {
-        background: white;
-        padding: 15px;
-        margin: 0 15px 10px 15px;
-        border-radius: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .tx-amount { font-weight: bold; font-size: 1.1rem; }
-    .tx-green { color: var(--accent-green); }
-    .tx-red { color: var(--primary-red); }
 
     .custom-date-box {
-        flex: 1;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        background: white;
-        color: var(--text-dark);
-        font-size: 0.9rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+        background: #ffffff; color: #333333; font-size: 0.9rem;
+        display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     }
 
-    /* Bottom Sheet Picker */
+    .tx-card {
+        background: white;
+        margin: 0 15px 15px 15px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .tx-card-header {
+        background: #ff6b6b; /* Coral from screenshot */
+        color: white;
+        padding: 12px 15px;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .tx-card-body {
+        padding: 5px 15px 15px 15px;
+    }
+
+    .tx-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem;
+    }
+
+    .tx-row:last-child { border-bottom: none; }
+    .tx-row .label { color: #333333; }
+    .tx-row .value { color: #333333; font-weight: 500; }
+    
+    .tx-val-red { color: #ff6b6b; font-weight: bold; font-size: 1.1rem; }
+    .tx-val-green { color: #34d399; font-weight: bold; font-size: 1.1rem; }
+
+    .header-basic {
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        color: #333333;
+        font-weight: bold;
+        position: sticky; top: 0; z-index: 100;
+    }
+    
+    .back-btn i { color: #333333; }
+
+    /* Picker styles */
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5); z-index: 2000;
-        display: none; opacity: 0; transition: opacity 0.3s;
+        background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
     }
     .bottom-sheet {
         position: fixed; bottom: -100%; left: 0; right: 0;
-        background: white; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        background: #ffffff; border-top-left-radius: 20px; border-top-right-radius: 20px;
         z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
+        color: #333333;
     }
     .sheet-header {
         display: flex; justify-content: space-between; align-items: center;
-        padding: 15px 20px; border-bottom: 1px solid var(--border-color); font-size: 1rem;
+        padding: 15px 20px; border-bottom: 1px solid #f1f5f9; font-size: 1rem;
     }
-    .sheet-header .cancel { color: var(--text-muted); cursor: pointer; }
+    .sheet-header .cancel { color: #64748b; cursor: pointer; }
     .sheet-header .title { font-weight: bold; }
-    .sheet-header .confirm { color: var(--primary-red); cursor: pointer; }
+    .sheet-header .confirm { color: #ff6b6b; cursor: pointer; }
     .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
     .picker-column {
         flex: 1; height: 100%; overflow-y: auto;
@@ -121,70 +97,30 @@
     .picker-column::-webkit-scrollbar { display: none; }
     .picker-item {
         height: 40px; display: flex; justify-content: center; align-items: center;
-        scroll-snap-align: center; font-size: 1.1rem; color: var(--text-muted); transition: color 0.2s;
+        scroll-snap-align: center; font-size: 1.1rem; color: #64748b; transition: color 0.2s;
     }
     .picker-highlight {
         position: absolute; top: 80px; left: 0; right: 0; height: 40px;
-        border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
+        border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
         pointer-events: none;
-    }
-    .tx-card {
-        background: white;
-        margin: 0 15px 12px 15px;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .badge-bonus {
-        display: inline-block;
-        background: linear-gradient(90deg, #a78bfa, #60a5fa);
-        color: white;
-        padding: 4px 14px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        margin-bottom: 12px;
-    }
-    .card-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-    }
-    .card-row .label { color: var(--text-muted); }
-    .card-row .value { font-weight: 500; color: var(--text-dark); }
-    .card-row .amount-green { font-weight: bold; color: var(--accent-green); }
-    .card-note {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        margin-top: 10px;
-        padding-top: 8px;
-        border-top: 1px dashed var(--border-color);
     }
 </style>
 
 <div class="header-basic">
     <a href="{% url 'account' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-    Transaction History
-</div>
-
-<div class="filter-tabs">
-    <div class="tab active"><i class="fas fa-th-large"></i> All</div>
-    <div class="tab"><i class="fas fa-gift" style="color: #a78bfa;"></i> Bonus</div>
-    <div class="tab"><i class="fas fa-caret-up" style="color: #f59e0b;"></i> Deposit</div>
-    <div class="tab"><i class="fas fa-credit-card" style="color: #10b981;"></i> Withdraw</div>
+    Transaction history
 </div>
 
 <div class="dropdown-filters">
     <select class="filter-select">
-        <option>Bonus</option>
         <option>All</option>
-        <option>Deposit</option>
-        <option>Withdraw</option>
+        <option>Game moved in</option>
+        <option>Game moved out</option>
+        <option>Bonus</option>
     </select>
     <div class="custom-date-box" onclick="openPicker()">
         <span id="currentDate">Choose a date</span>
-        <i class="fas fa-chevron-down" style="color: var(--text-muted);"></i>
+        <i class="fas fa-chevron-down" style="color: #64748b;"></i>
     </div>
 </div>
 
@@ -205,7 +141,7 @@
 </div>
 
 <!-- Dynamic List Container -->
-<div id="transaction-list">
+<div id="transaction-list" style="padding-bottom: 30px;">
     <!-- Populated by JS -->
 </div>
 
@@ -220,30 +156,36 @@
 
     let currentCategory = 'All';
 
-    // Mock Data Store
+    // Mock Data Store - 15+ Structured Records
     const specificData = {
+        "2026-04-21": [
+            { type: "Game moved in", detail: "Game moved in", amount: 900.33, time: "2026-04-21 11:36:05" },
+            { type: "Game moved out", detail: "Game moved out", amount: 1250.00, time: "2026-04-21 10:15:33" }
+        ],
+        "2026-04-20": [
+            { type: "Game moved in", detail: "Game moved in", amount: 450.00, time: "2026-04-20 18:22:11" },
+            { type: "Bonus", detail: "Daily login bonus", amount: 1500.00, time: "2026-04-20 09:30:44" }
+        ],
         "2026-04-19": [
-            { type: "Bonus", amount: 823422.00, time: "2026-04-19 12:13:18", note: "Referral bonus" },
-            { type: "Deposit", amount: 1500000.00, time: "2026-04-19 10:45:22", note: "UPI Deposit" },
-            { type: "Withdraw", amount: 483600.00, time: "2026-04-19 12:42:28", note: "USDT Withdrawal" }
+            { type: "Game moved out", detail: "Game moved out", amount: 2100.00, time: "2026-04-19 14:42:28" },
+            { type: "Bonus", detail: "Referral bonus", amount: 5000.00, time: "2026-04-19 12:13:18" }
         ],
         "2026-04-18": [
-            { type: "Bonus", amount: 213000.00, time: "2026-04-18 11:13:53", note: "Agent salary" },
-            { type: "Deposit", amount: 500000.00, time: "2026-04-18 09:20:11", note: "Direct bank deposit" },
-            { type: "Withdraw", amount: 342335.00, time: "2026-04-18 13:36:54", note: "Bank Withdrawal" }
+            { type: "Game moved in", detail: "Game moved in", amount: 742.00, time: "2026-04-18 12:42:28" },
+            { type: "Game moved out", detail: "Game moved out", amount: 550.00, time: "2026-04-18 09:20:11" }
         ],
         "2026-04-17": [
-            { type: "Bonus", amount: 95500.00, time: "2026-04-17 09:45:22", note: "ADS fee" },
-            { type: "Deposit", amount: 1200000.00, time: "2026-04-17 08:30:44", note: "External Wallet" },
-            { type: "Withdraw", amount: 540890.00, time: "2026-04-17 12:54:54", note: "USDT Withdrawal" }
+            { type: "Game moved in", detail: "Game moved in", amount: 900.33, time: "2026-04-17 12:24:46" },
+            { type: "Game moved out", detail: "Game moved out", amount: 900.33, time: "2026-04-17 12:24:37" },
+            { type: "Bonus", detail: "Weekly agency award", amount: 125000.00, time: "2026-04-17 08:30:44" }
         ],
         "2026-04-16": [
-            { type: "Bonus", amount: 150000.00, time: "2026-04-16 14:22:11", note: "Performance bonus" },
-            { type: "Deposit", amount: 850000.00, time: "2026-04-16 11:20:44", note: "UPI Deposit" }
+            { type: "Game moved in", detail: "Game moved in", amount: 840.00, time: "2026-04-16 12:54:54" },
+            { type: "Game moved out", detail: "Game moved out", amount: 12000.00, time: "2026-04-16 08:44:12" }
         ],
         "2026-04-15": [
-            { type: "Bonus", amount: 320000.00, time: "2026-04-15 11:11:11", note: "Monthly award" },
-            { type: "Withdraw", amount: 920500.00, time: "2026-04-15 14:30:22", note: "High volume withdrawal" }
+            { type: "Game moved in", detail: "Game moved in", amount: 739.00, time: "2026-04-15 10:15:33" },
+            { type: "Bonus", detail: "First deposit bonus", amount: 500.00, time: "2026-04-15 09:30:11" }
         ]
     };
 
@@ -258,8 +200,8 @@
 
         if (data.length === 0) {
             listContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e5e7eb; margin-bottom: 20px;"></i>
+                <div class="empty-state" style="padding: 100px 20px; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e2e8f0; margin-bottom: 20px;"></i>
                     <p>No data</p>
                 </div>
             `;
@@ -268,64 +210,35 @@
 
         let html = '';
         data.forEach(item => {
-            if (item.type === 'Bonus') {
-                html += `
-                <div class="tx-card">
-                    <div class="badge-bonus">Bonus</div>
-                    <div class="card-row">
+            const isOut = item.type === 'Game moved out';
+            const valClass = isOut ? 'tx-val-green' : 'tx-val-red';
+            
+            html += `
+            <div class="tx-card">
+                <div class="tx-card-header">${item.type}</div>
+                <div class="tx-card-body">
+                    <div class="tx-row">
                         <span class="label">Detail</span>
-                        <span class="value">Bonus</span>
+                        <span class="value">${item.detail}</span>
                     </div>
-                    <div class="card-row">
+                    <div class="tx-row">
                         <span class="label">Time</span>
                         <span class="value">${item.time}</span>
                     </div>
-                    <div class="card-row">
+                    <div class="tx-row">
                         <span class="label">Balance</span>
-                        <span class="amount-green">₹${item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
-                    </div>
-                    <div class="card-note">${item.note}</div>
-                </div>
-                `;
-            } else {
-                const isPositive = ['Deposit', 'Bonus', 'WIN'].includes(item.type);
-                html += `
-                <div class="tx-item">
-                    <div>
-                        <div style="font-weight: 500; font-size: 0.95rem;">${item.type}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">${item.time}</div>
-                    </div>
-                    <div class="tx-amount ${isPositive ? 'tx-green' : 'tx-red'}">
-                        ${isPositive ? '+' : '-'}₹${item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                        <span class="${valClass}">₹${item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
                     </div>
                 </div>
-                `;
-            }
+            </div>
+            `;
         });
         listContainer.innerHTML = html;
     }
 
-    // Tab Switching Logic
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            currentCategory = this.textContent.trim();
-            renderTransactions();
-        });
-    });
-
     // Dropdown Select Logic
     document.querySelector('.filter-select').addEventListener('change', function() {
         currentCategory = this.value;
-        // Update tabs to match selection
-        document.querySelectorAll('.tab').forEach(t => {
-            if (t.textContent.trim() === currentCategory) {
-                t.classList.add('active');
-            } else {
-                t.classList.remove('active');
-            }
-        });
         renderTransactions();
     });
 
@@ -336,7 +249,6 @@
             html += `<div class="picker-item" data-val="${val}">${val}</div>`;
         }
         el.innerHTML = html;
-        updateHighlight(el);
     }
 
     const today = new Date();
@@ -365,7 +277,7 @@
     }
 
     updateDays();
-    renderTransactions(); // Initial Render
+    renderTransactions();
 
     function openPicker() {
         overlay.style.display = 'block';
@@ -398,21 +310,9 @@
                 break;
             }
         }
-        updateHighlight(column);
-    }
-
-    function updateHighlight(column) {
-        let centerIndex = Math.round(column.scrollTop / 40);
-        let items = column.querySelectorAll('.picker-item');
-        
-        items.forEach((item, idx) => {
-            item.style.color = (idx === centerIndex) ? 'var(--text-dark)' : 'var(--text-muted)';
-            item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
-        });
     }
 
     function handleScroll(column) {
-        updateHighlight(column);
         if(column.id === 'colYear' || column.id === 'colMonth') {
             updateDays();
         }
