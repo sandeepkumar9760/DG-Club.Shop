@@ -2,73 +2,88 @@
 
 {% block content %}
 <style>
-    body { background-color: #1a1a3a !important; }
+    body { background-color: #f6f7fa !important; }
     
     .withdraw-card {
-        background: #2b2b4b;
-        margin: 0 15px 12px 15px;
+        background: #ffffff;
+        margin: 0 15px 15px 15px;
         border-radius: 12px;
-        padding: 18px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        border: 1px solid rgba(255,255,255,0.05);
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
     .card-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
     }
 
     .badge-withdraw {
-        background: #ba2d31;
+        background: #ff6b6b; /* Exact coral red from screenshot */
         color: white;
         padding: 5px 16px;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: bold;
-        text-transform: capitalize;
     }
 
     .status-completed {
         color: #34d399;
         font-size: 0.85rem;
-        font-weight: 500;
+        font-weight: bold;
+    }
+
+    .status-rejected {
+        color: #ff8a8f;
+        font-size: 0.85rem;
+        font-weight: bold;
     }
 
     .card-row {
         display: flex;
         justify-content: space-between;
         font-size: 0.9rem;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
-    .card-row .label { color: #8e8eaf; }
-    .card-row .value { font-weight: 500; color: #ffffff; }
-    .card-row .amount { font-weight: bold; color: #f59e0b; font-size: 1.05rem; }
+    .card-row .label { color: #333333; }
+    .card-row .value { color: #333333; font-weight: 500; }
+    .card-row .amount { font-weight: bold; color: #f59e0b; font-size: 1rem; }
 
     .order-num {
         font-size: 0.75rem;
-        color: #8e8eaf;
+        color: #64748b;
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-top: 5px;
     }
 
+    .remarks-box {
+        background: #f1f5f9;
+        color: #1e293b;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+
     .filter-tabs {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         padding: 15px;
         overflow-x: auto;
-        background: #1a1a3a;
+        background: #ffffff;
+        margin-bottom: 15px;
     }
 
     .tab {
         padding: 10px 20px;
-        background: #2b2b4b;
+        background: #f8fafc;
         border-radius: 8px;
         font-weight: 500;
         font-size: 0.85rem;
@@ -76,53 +91,54 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #ffffff;
-        border: 1px solid rgba(255,255,255,0.1);
+        color: #475569;
+        border: 1px solid #e2e8f0;
     }
 
-    .tab.active { background: var(--primary-gradient); color: white; border: none; }
+    .tab.active { background: #ff6b6b; color: white; border: none; }
 
-    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; background: #1a1a3a; }
+    .dropdown-filters { display: flex; gap: 10px; padding: 0 15px 15px 15px; background: #f6f7fa; }
     .filter-select {
-        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-        background: #2b2b4b; color: #ffffff; outline: none; font-size: 0.9rem;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+        background: #ffffff; color: #333333; outline: none; font-size: 0.9rem;
         appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' stroke='white' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
         background-repeat: no-repeat; background-position: right 10px center; background-size: 15px;
     }
     .custom-date-box {
-        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-        background: #2b2b4b; color: #ffffff; font-size: 0.9rem;
+        flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;
+        background: #ffffff; color: #333333; font-size: 0.9rem;
         display: flex; justify-content: space-between; align-items: center; cursor: pointer;
     }
 
     .header-basic {
-        background: #1a1a3a !important;
-        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
-        color: white !important;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        color: #333333;
+        font-weight: bold;
     }
     
-    .back-btn i { color: white !important; }
+    .back-btn i { color: #333333; }
 
     /* Picker styles */
     .modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.7); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
+        background: rgba(0,0,0,0.5); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
     }
     .bottom-sheet {
         position: fixed; bottom: -100%; left: 0; right: 0;
-        background: #2b2b4b; border-top-left-radius: 20px; border-top-right-radius: 20px;
+        background: #ffffff; border-top-left-radius: 20px; border-top-right-radius: 20px;
         z-index: 2001; transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1); padding-bottom: 20px;
-        color: white;
+        color: #333333;
     }
     .sheet-header {
         display: flex; justify-content: space-between; align-items: center;
-        padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1rem;
+        padding: 15px 20px; border-bottom: 1px solid #f1f5f9; font-size: 1rem;
     }
-    .sheet-header .cancel { color: #8e8eaf; cursor: pointer; }
+    .sheet-header .cancel { color: #64748b; cursor: pointer; }
     .sheet-header .title { font-weight: bold; }
-    .sheet-header .confirm { color: #ba2d31; cursor: pointer; }
-    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; background: #2b2b4b; }
+    .sheet-header .confirm { color: #ff6b6b; cursor: pointer; }
+    .picker-container { display: flex; height: 200px; position: relative; overflow: hidden; }
     .picker-column {
         flex: 1; height: 100%; overflow-y: auto;
         scroll-snap-type: y mandatory; scrollbar-width: none; padding: 80px 0;
@@ -130,24 +146,24 @@
     .picker-column::-webkit-scrollbar { display: none; }
     .picker-item {
         height: 40px; display: flex; justify-content: center; align-items: center;
-        scroll-snap-align: center; font-size: 1.1rem; color: #8e8eaf; transition: color 0.2s;
+        scroll-snap-align: center; font-size: 1.1rem; color: #64748b; transition: color 0.2s;
     }
     .picker-highlight {
         position: absolute; top: 80px; left: 0; right: 0; height: 40px;
-        border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);
+        border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
         pointer-events: none;
     }
 </style>
 
 <div class="header-basic">
     <a href="{% url 'account' %}" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-    Withdrawal History
+    Withdrawal history
 </div>
 
 <div class="filter-tabs">
     <div class="tab active"><i class="fas fa-th-large"></i> All</div>
-    <div class="tab"><i class="fas fa-check-circle" style="color:#34d399;"></i> Completed</div>
-    <div class="tab"><i class="fas fa-clock" style="color:#f59e0b;"></i> Pending</div>
+    <div class="tab"><i class="fas fa-wallet"></i> ARWallet</div>
+    <div class="tab"><i class="fas fa-university"></i> BANK CARD</div>
 </div>
 
 <div class="dropdown-filters">
@@ -158,7 +174,7 @@
     </select>
     <div class="custom-date-box" onclick="openPicker()">
         <span id="currentDate">Choose a date</span>
-        <i class="fas fa-chevron-down" style="color: #8e8eaf;"></i>
+        <i class="fas fa-chevron-down" style="color: #64748b;"></i>
     </div>
 </div>
 
@@ -179,7 +195,7 @@
 </div>
 
 <!-- Dynamic List Container -->
-<div id="withdraw-list" style="background: #1a1a3a; min-height: calc(100vh - 200px); padding-bottom: 30px;">
+<div id="withdraw-list" style="padding-bottom: 30px;">
     <!-- Populated by JS -->
 </div>
 
@@ -192,43 +208,34 @@
     const colMonth = document.getElementById('colMonth');
     const colDay = document.getElementById('colDay');
 
-    // Mock Data Store - 10+ Realistic Records
+    // Mock Data Store - 12+ Realistic Records with Status Support
     const specificData = {
+        "2026-04-21": [
+            { amount: 2100.00, type: "UPI", time: "2026-04-21 11:36:05", order: "WD2026042111360579120097b", status: "Completed" },
+            { amount: 2000.00, type: "UPI", time: "2026-04-21 10:15:33", order: "WD2026042110153312345678", status: "Rejected", remarks: "Hello, please make a new request of your withdrawal, thank you." },
+            { amount: 800.00, type: "UPI", time: "2026-04-21 09:20:11", order: "WD202604210920119827361", status: "Completed" }
+        ],
+        "2026-04-20": [
+            { amount: 483600.00, type: "USDT", time: "2026-04-20 12:42:28", order: "WD202604201242289048563", status: "Completed" },
+            { amount: 312000.00, type: "Bank", time: "2026-04-20 10:15:33", order: "WD2026042010153312345678", status: "Completed" }
+        ],
         "2026-04-19": [
-            { amount: 483600.00, type: "USDT", time: "2026-04-19 12:42:28", order: "WD202604191242289048563" },
-            { amount: 312000.00, type: "Bank", time: "2026-04-19 10:15:33", order: "WD2026041910153312345678" }
+            { amount: 342335.00, type: "Bank", time: "2026-04-19 13:36:54", order: "WD202604191336541297118", status: "Completed" },
+            { amount: 25000.00, type: "UPI", time: "2026-04-19 11:15:00", order: "WD202604191115009988776", status: "Rejected", remarks: "Bank server issue. Please try again after 2 hours." }
         ],
         "2026-04-18": [
-            { amount: 342335.00, type: "Bank", time: "2026-04-18 13:36:54", order: "WD202604181336541297118" },
-            { amount: 590000.00, type: "USDT", time: "2026-04-18 09:20:11", order: "WD202604180920119827361" }
+            { amount: 540890.00, type: "USDT", time: "2026-04-18 12:54:54", order: "WD202604181254547487020", status: "Completed" },
+            { amount: 15600.00, type: "UPI", time: "2026-04-18 08:44:12", order: "WD202604180844123344556", status: "Completed" }
         ],
         "2026-04-17": [
-            { amount: 540890.00, type: "USDT", time: "2026-04-17 12:54:54", order: "WD202604171254547487020" },
-            { amount: 285400.00, type: "USDT", time: "2026-04-17 08:44:12", order: "WD202604170844123344556" }
+            { amount: 139450.00, type: "USDT", time: "2026-04-17 10:15:33", order: "WD202604171015331234567", status: "Completed" }
         ],
         "2026-04-16": [
-            { amount: 139450.00, type: "USDT", time: "2026-04-16 10:15:33", order: "WD202604161015331234567" },
-            { amount: 845000.00, type: "Bank", time: "2026-04-16 11:20:44", order: "WD202604161120445566778" }
+            { amount: 845000.00, type: "Bank", time: "2026-04-16 11:20:44", order: "WD202604161120445566778", status: "Completed" },
+            { amount: 3000.00, type: "UPI", time: "2026-04-16 09:30:11", order: "WD202604160930119827361", status: "Rejected", remarks: "Incorrect account details provided." }
         ],
         "2026-04-15": [
-            { amount: 920500.00, type: "USDT", time: "2026-04-15 14:30:22", order: "WD202604151430221122334" },
-            { amount: 450000.00, type: "USDT", time: "2026-04-15 11:15:00", order: "WD202604151115009988776" }
-        ],
-        "2026-04-14": [
-            { amount: 685200.00, type: "Bank", time: "2026-04-14 16:22:11", order: "WD202604141622114455667" }
-        ],
-        "2026-04-13": [
-            { amount: 890000.00, type: "USDT", time: "2026-04-13 18:44:55", order: "WD202604131844555566778" },
-            { amount: 120000.00, type: "USDT", time: "2026-04-13 10:33:44", order: "WD202604131033442233445" }
-        ],
-        "2026-04-12": [
-            { amount: 356000.00, type: "Bank", time: "2026-04-12 12:12:12", order: "WD202604121212128899001" }
-        ],
-        "2026-04-11": [
-            { amount: 567800.00, type: "USDT", time: "2026-04-11 15:15:15", order: "WD202604111515152233441" }
-        ],
-        "2026-04-10": [
-            { amount: 778900.00, type: "USDT", time: "2026-04-10 11:11:11", order: "WD202604101111115566772" }
+            { amount: 920500.00, type: "USDT", time: "2026-04-15 14:30:22", order: "WD202604151430221122334", status: "Completed" }
         ]
     };
 
@@ -238,8 +245,8 @@
         
         if (data.length === 0) {
             listContainer.innerHTML = `
-                <div class="empty-state" style="padding: 60px 20px; text-align: center; color: #8e8eaf;">
-                    <i class="fas fa-file-invoice" style="font-size: 80px; color: rgba(255,255,255,0.1); margin-bottom: 20px;"></i>
+                <div class="empty-state" style="padding: 100px 20px; text-align: center; color: #94a3b8;">
+                    <i class="fas fa-file-invoice" style="font-size: 80px; color: #e2e8f0; margin-bottom: 20px;"></i>
                     <p>No data</p>
                 </div>
             `;
@@ -248,11 +255,12 @@
 
         let html = '';
         data.forEach(item => {
+            const statusClass = item.status === 'Completed' ? 'status-completed' : 'status-rejected';
             html += `
             <div class="withdraw-card">
                 <div class="card-top">
                     <span class="badge-withdraw">Withdraw</span>
-                    <span class="status-completed"><i class="fas fa-check-circle"></i> Completed</span>
+                    <span class="${statusClass}">${item.status}</span>
                 </div>
                 <div class="card-row">
                     <span class="label">Balance</span>
@@ -267,9 +275,10 @@
                     <span class="value">${item.time}</span>
                 </div>
                 <div class="order-num">
-                    <span class="label">Order number</span>
+                    <span class=\"label\">Order number</span>
                     <span class="value">${item.order} <i class="far fa-copy" style="margin-left:4px; cursor:pointer;" onclick="copyOrder('${item.order}', this)"></i></span>
                 </div>
+                ${item.remarks ? `<div class="remarks-box">${item.remarks}</div>` : ''}
             </div>
             `;
         });
@@ -290,7 +299,6 @@
             html += `<div class="picker-item" data-val="${val}">${val}</div>`;
         }
         el.innerHTML = html;
-        updateHighlight(el);
     }
 
     const today = new Date();
@@ -352,21 +360,9 @@
                 break;
             }
         }
-        updateHighlight(column);
-    }
-
-    function updateHighlight(column) {
-        let centerIndex = Math.round(column.scrollTop / 40);
-        let items = column.querySelectorAll('.picker-item');
-        
-        items.forEach((item, idx) => {
-            item.style.color = (idx === centerIndex) ? '#ffffff' : '#8e8eaf';
-            item.style.fontWeight = (idx === centerIndex) ? 'bold' : 'normal';
-        });
     }
 
     function handleScroll(column) {
-        updateHighlight(column);
         if(column.id === 'colYear' || column.id === 'colMonth') {
             updateDays();
         }
